@@ -1,6 +1,11 @@
 <template>
   <div id="app">
-    <img src="./assets/logo.png">
+
+    <b-nav tabs>
+      <b-nav-item> <router-link to="/notice">Notice</router-link> </b-nav-item>
+      <b-nav-item> <router-link to="/report">Report</router-link> </b-nav-item>
+    </b-nav>
+
     <router-view/>
   </div>
 </template>
@@ -18,6 +23,5 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
 }
 </style>

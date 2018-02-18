@@ -4,9 +4,16 @@
 
 ## Build Setup
 
+
+# Make sure to install firebase-tools
+npm install -g firebase-tools
+
 ``` bash
 # install dependencies
 npm install
+
+# 빌드 후 배포 방법 (앞에 두 단계가 완료되어있어야하고, 터미널 명령임)
+npm run build && firebase deploy
 
 # serve with hot reload at localhost:8080
 npm run dev
