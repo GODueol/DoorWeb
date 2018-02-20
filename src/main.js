@@ -6,20 +6,29 @@ import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import 'bootstrap/dist/css/bootstrap.css'
 
-import Firebaseui from 'firebaseui'
+import firebase from 'firebase'
 import 'firebaseui/dist/firebaseui.css'
 
 import App from './App'
 import router from './router'
+import {config} from './helpers/firebaseConfig'
 
 Vue.config.productionTip = false
 Vue.use(BootstrapVue)
-Vue.use(Firebaseui)
 
 /* eslint-disable no-new */
 new Vue({
   el: '#app',
   router,
-  components: { App },
-  template: '<App/>'
+  created: function () {
+    firebase.initializeApp(config)
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        this.$router.push('/success')
+      } else {
+        this.$router.push('/auth')
+      }
+    })
+  },
+  render: h => h(App)
 })

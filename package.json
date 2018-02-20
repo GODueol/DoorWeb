@@ -16,6 +16,7 @@
   "dependencies": {
     "bootstrap": "^4.0.0",
     "bootstrap-vue": "^2.0.0-rc.1",
+    "firebase": "^4.10.0",
     "firebase-admin": "^5.9.0",
     "firebaseui": "^2.6.1",
     "jquery": "^3.3.1",
