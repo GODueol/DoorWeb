@@ -2,8 +2,9 @@
   <div id="app">
 
     <b-nav tabs>
-      <b-nav-item> <router-link to="/notice">Notice</router-link> </b-nav-item>
-      <b-nav-item> <router-link to="/report">Report</router-link> </b-nav-item>
+      <b-nav-item v-if="menuSeen"> <router-link to="/notice">Notice</router-link> </b-nav-item>
+      <b-nav-item v-if="menuSeen"> <router-link to="/report">Report</router-link> </b-nav-item>
+      <b-nav-item v-if="menuSeen" v-on:click="logOut"> Logout </b-nav-item>
     </b-nav>
 
     <router-view/>
@@ -11,8 +12,28 @@
 </template>
 
 <script>
+import firebase from 'firebase'
 export default {
-  name: 'App'
+  name: 'App',
+  data: function () {
+    return {
+      menuSeen: false
+    }
+  },
+  created: function () {
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        this.menuSeen = true
+      } else {
+        this.menuSeen = false
+      }
+    })
+  },
+  methods: {
+    logOut () {
+      firebase.auth().signOut()
+    }
+  }
 }
 </script>
 
