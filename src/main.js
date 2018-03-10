@@ -13,8 +13,11 @@ import App from './App'
 import router from './router'
 import {config} from './helpers/firebaseConfig'
 
+import VueFire from 'vuefire'
+
 Vue.config.productionTip = false
 Vue.use(BootstrapVue)
+Vue.use(VueFire)
 
 /* eslint-disable no-new */
 new Vue({

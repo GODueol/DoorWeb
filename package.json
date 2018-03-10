@@ -16,13 +16,14 @@
   "dependencies": {
     "bootstrap": "^4.0.0",
     "bootstrap-vue": "^2.0.0-rc.1",
-    "firebase": "^4.10.0",
+    "firebase": "^4.11.0",
     "firebase-admin": "^5.9.0",
     "firebaseui": "^2.6.1",
     "jquery": "^3.3.1",
     "popper.js": "^1.12.9",
-    "vue": "^2.5.2",
-    "vue-router": "^3.0.1"
+    "vue": "^2.5.13",
+    "vue-router": "^3.0.1",
+    "vuefire": "^1.4.5"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",
