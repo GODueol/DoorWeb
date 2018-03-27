@@ -1,4 +1,4 @@
-# core-web
+nod# core-web
 
 > A Vue.js project
 
@@ -13,7 +13,7 @@ npm install -g firebase-tools
  firebase login
 
 # install dependencies
-npm install && npm install ./function
+npm install && npm install ./functions
 
 # 빌드 후 배포 방법 (앞에 두 단계가 완료되어있어야하고, 터미널 명령임)
 npm run build && firebase deploy
