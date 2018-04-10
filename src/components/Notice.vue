@@ -44,7 +44,6 @@
   let app = firebase.initializeApp(config);
   let db = app.database();
   let noticeRef = db.ref('notice');
-
   export default {
 
     name: 'Notice',
@@ -58,16 +57,7 @@
         user: {},
         todos: [
           {
-            name: '청소'
-          },
-          {
-            name: '블로그 쓰기'
-          },
-          {
-            name: '밥먹기'
-          },
-          {
-            name: '안녕'
+            name: 'dsadsad'
           }
         ]
       }
@@ -80,6 +70,11 @@
         this.photo = this.user.photoURL
         this.userId = this.user.uid
       }
+      var todos = this.todos;
+      noticeRef.on('child_added',function (data){
+        console.log(data.val().text);
+        todos.push({name: data.val().text});
+      });
     },
     methods: {
       deleteTodo(i) {
@@ -90,8 +85,10 @@
           this.todos.push({name: name});
           this.text = null;
 
-         noticeRef.set({
-            username: name
+         noticeRef.push({
+            uid : this.userId,
+            writeDate : Date.now(),
+            text: name
           });
         }
       }
