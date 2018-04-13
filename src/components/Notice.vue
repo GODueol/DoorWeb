@@ -7,6 +7,11 @@
              placeholder="할일을 입력하세요"
              v-model="text"
              v-on:keyup.enter="createTodo(text)">
+
+      <input type="file"
+             id="image"
+             accept=".jpg, .jpeg, .png"
+             multiple>
       <span class="input-group-btn">
 		<button class="btn btn-default" type="button"
             @click="createTodo(text)">추가</button>
@@ -30,6 +35,7 @@
 
 </template>
 
+
 <script>
   import firebase from 'firebase'
 
@@ -41,6 +47,7 @@
     storageBucket: "core-865fc.appspot.com",
     messagingSenderId: "699214818051"
   };
+
   let app = firebase.initializeApp(config);
   let db = app.database();
   let noticeRef = db.ref('notice');
@@ -50,16 +57,13 @@
     data() {
       return {
         msg: 'Welcome to Your Vue.js App',
-        photo: '',
-        userId: '',
-        name: '',
-        email: '',
+        noticekey: String,
+        photo: String,
+        userId: String,
+        name: String,
+        email: String,
         user: {},
-        todos: [
-          {
-            name: 'dsadsad'
-          }
-        ]
+        todos: []
       }
     },
     created: function () {
@@ -71,25 +75,51 @@
         this.userId = this.user.uid
       }
       var todos = this.todos;
-      noticeRef.on('child_added',function (data){
-        console.log(data.val().text);
-        todos.push({name: data.val().text});
+      noticeRef.on('child_added', function (data) {
+        todos.unshift({name: data.val().text, userId: data.val().uid, noticekey: data.key})
+      });
+
+      var noticeData = noticeRef;
+      noticeData.on('value', function (snapshot) {
+        //updateStarCount(postElement, snapshot.val());
       });
     },
     methods: {
       deleteTodo(i) {
-        this.todos.splice(0, 1);
-      },
-      createTodo(name) {
-        if (name != null) {
-          this.todos.push({name: name});
-          this.text = null;
+        if (confirm("정말 공지를 삭제하시겠습니까?") == true) {
+          noticeRef.child(this.todos[i].noticekey).remove()
+          this.todos.splice(0, 1)
 
-         noticeRef.push({
-            uid : this.userId,
-            writeDate : Date.now(),
-            text: name
-          });
+        }
+      },
+      createTodo(text) {
+        if (text != null) {
+          if (confirm("정말 공지를 등록하시겠습니까?") == true) {
+
+            var name = this.name
+            var uid = this.userId
+            var selectedFile = document.getElementById('image').files[0]
+            if (selectedFile != null) {
+              var storageRef = firebase.storage().ref();
+              storageRef.child('notice').child(selectedFile.name).put(selectedFile).then(function (snapshot) {
+
+                noticeRef.push({
+                  name: name,
+                  photo :snapshot.downloadURL,
+                  uid: uid,
+                  writeDate: Date.now(),
+                  text: text
+                });
+              })
+            } else {
+              noticeRef.push({
+                name: name,
+                uid: uid,
+                writeDate: Date.now(),
+                text: text
+              });
+            }
+          }
         }
       }
     },
