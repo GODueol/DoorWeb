@@ -7,7 +7,6 @@
              placeholder="할일을 입력하세요"
              v-model="text"
              v-on:keyup.enter="createTodo(text)">
-
       <input type="file"
              id="image"
              accept=".jpg, .jpeg, .png"
@@ -18,7 +17,13 @@
 	</span>
     </div>
     <ul class="list-group">
-      <li class="list-group-item" v-for="(todo, index) in todos">
+      <li class="list-group-item" v-for="(todo, index) in todos" >
+        <span>
+        <img v-if="todo.photo" v-bind:src="todo.photo"
+             height="200"
+             weight="200"
+             @click="detailImg(todo.photo)">
+          </span>
         {{todo.name}}
         <div class="btn-group pull-right"
              style="font-size: 12px; line-height: 1;">
@@ -51,6 +56,7 @@
   let app = firebase.initializeApp(config);
   let db = app.database();
   let noticeRef = db.ref('notice');
+  let storageRef = firebase.storage().ref('notice');
   export default {
 
     name: 'Notice',
@@ -74,19 +80,41 @@
         this.photo = this.user.photoURL
         this.userId = this.user.uid
       }
-      var todos = this.todos;
+      let todos = this.todos;
       noticeRef.on('child_added', function (data) {
-        todos.unshift({name: data.val().text, userId: data.val().uid, noticekey: data.key})
+
+        if (data.val().photo != null) {
+
+          firebase.storage().refFromURL(data.val().photo).getDownloadURL().then(function (url) {
+            var xhr = new XMLHttpRequest();
+            xhr.responseType = 'blob';
+            xhr.onload = function (event) {
+              var blob = xhr.response;
+            };
+            xhr.open('GET', url);
+            xhr.send();
+
+            // Or inserted into an <img> element:
+            //var img = document.getElementById('listimage');
+            //img.src = url;
+
+            todos.unshift({name: data.val().text, userId: data.val().uid, noticekey: data.key, photo: url})
+          }).catch(function (error) {
+
+          })
+        } else {
+          todos.unshift({name: data.val().text, userId: data.val().uid, noticekey: data.key})
+        }
       });
 
-      var noticeData = noticeRef;
+      let noticeData = noticeRef;
       noticeData.on('value', function (snapshot) {
         //updateStarCount(postElement, snapshot.val());
       });
     },
     methods: {
       deleteTodo(i) {
-        if (confirm("정말 공지를 삭제하시겠습니까?") == true) {
+        if (confirm("정말 공지를 삭제하시겠습니까?") === true) {
           noticeRef.child(this.todos[i].noticekey).remove()
           this.todos.splice(0, 1)
 
@@ -94,18 +122,17 @@
       },
       createTodo(text) {
         if (text != null) {
-          if (confirm("정말 공지를 등록하시겠습니까?") == true) {
+          if (confirm("정말 공지를 등록하시겠습니까?") === true) {
 
-            var name = this.name
-            var uid = this.userId
-            var selectedFile = document.getElementById('image').files[0]
+            let name = this.name
+            let uid = this.userId
+            let selectedFile = document.getElementById('image').files[0]
             if (selectedFile != null) {
-              var storageRef = firebase.storage().ref();
-              storageRef.child('notice').child(selectedFile.name).put(selectedFile).then(function (snapshot) {
+              storageRef.child(selectedFile.name).put(selectedFile).then(function (snapshot) {
 
                 noticeRef.push({
                   name: name,
-                  photo :snapshot.downloadURL,
+                  photo: snapshot.downloadURL,
                   uid: uid,
                   writeDate: Date.now(),
                   text: text
@@ -121,8 +148,30 @@
             }
           }
         }
+      },
+      detailImg(url) {
+        console.log("dsadsad")
+        let img1 = new Image();
+        img1.src = (url);
+        if ((img1.width != 0) && (img1.height != 0)) {
+          let W = img1.width;
+          let H = img1.height;
+          let O = "width=" + W + ",height=" + H + ",scrollbars=yes";
+          let imgWin = window.open("", "", O);
+          imgWin.document.write("<html><head><title>:*:*:*: 이미지상세보기 :*:*:*:*:*:*:</title></head>");
+          imgWin.document.write("<body topmargin=0 leftmargin=0>");
+          imgWin.document.write("<img src=" + url + " onclick='self.close()' style='cursor:pointer;' title ='클릭하시면 창이 닫힙니다.'>");
+          imgWin.document.close();
+
+        }
+        else {
+          let controller = "imgControll('" + url + "')";
+          intervalID = setTimeout(controller, 20);
+        }
+
+
       }
-    },
+    }
   }
 </script>
 
@@ -137,9 +186,9 @@
     list-style-type: none;
     padding: 0;
   }
+  span { display: block }
 
   li {
-    display: inline-block;
     margin: 0 10px;
   }
 
