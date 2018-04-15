@@ -96,11 +96,6 @@
           todos.unshift({name: data.val().text, userId: data.val().uid, noticekey: data.key})
         }
       });
-
-      let noticeData = noticeRef;
-      noticeData.on('value', function (snapshot) {
-        //updateStarCount(postElement, snapshot.val());
-      });
     },
     methods: {
       deleteTodo(i) {

@@ -2,34 +2,26 @@
 
   <div class="container">
     <h2>{{userId}}</h2>
-    <div class="input-group" style="margin-bottom:10px;">
-      <input type="text" class="form-control"
-             placeholder="할일을 입력하세요"
-             v-model="text"
-             v-on:keyup.enter="createTodo(text)">
-      <input type="file"
-             id="image"
-             accept=".jpg, .jpeg, .png"
-             multiple>
-      <span class="input-group-btn">
-		<button class="btn btn-default" type="button"
-            @click="createTodo(text)">추가</button>
-	</span>
-    </div>
+
     <ul class="list-group">
-      <li class="list-group-item" v-for="(todo, index) in todos" >
+      <li class="list-group-item" v-for="(suggest, index) in suggestList" >
         <span>
-        <img v-if="todo.photo" v-bind:src="todo.photo"
+        <img v-if="suggest.photo" v-bind:src="suggest.photo"
              height="200"
              weight="200"
-             @click="detailImg(todo.photo)">
+             @click="detailImg(suggest.photo)">
           </span>
-        {{todo.name}}
+        <span> ● &nbsp; 유저이메일 : {{suggest.email}}</span>
+        <span> ● &nbsp; 수신이메일 : {{suggest.recive_email}}</span>
+        <span> ● &nbsp; 브랜드 : {{suggest.brand}}</span>
+        <span> ● &nbsp; os버전 : {{suggest.os}}</span>
+        <span> ● &nbsp; 유저id : {{suggest.sendUser}}</span>
+        <span> ● &nbsp; 내용 : {{suggest.content}}</span>
         <div class="btn-group pull-right"
              style="font-size: 12px; line-height: 1;">
           <ul>
             <li>
-              <a href="#" @click="deleteTodo(index)">삭제</a>
+              <a href="#" @click="judgment(suggest.recive_email)">답변하기</a>
             </li>
           </ul>
         </div>
@@ -45,7 +37,7 @@
   import firebase from 'firebase'
 
   let db = firebase.database();
-  let noticeRef = db.ref('notice');
+  let suggestRef = db.ref('suggestion');
   let storageRef = firebase.storage().ref('notice');
   export default {
 
@@ -59,7 +51,7 @@
         name: String,
         email: String,
         user: {},
-        todos: []
+        suggestList : []
       }
     },
     created: function () {
@@ -70,8 +62,8 @@
         this.photo = this.user.photoURL
         this.userId = this.user.uid
       }
-      let todos = this.todos;
-      noticeRef.on('child_added', function (data) {
+      let suggestList = this.suggestList;
+      suggestRef.on('child_added', function (data) {
 
         if (data.val().photo != null) {
 
@@ -84,82 +76,21 @@
             xhr.open('GET', url);
             xhr.send();
 
-            // Or inserted into an <img> element:
-            //var img = document.getElementById('listimage');
-            //img.src = url;
-
-            todos.unshift({name: data.val().text, userId: data.val().uid, noticekey: data.key, photo: url})
+            suggestList.unshift({brand: data.val().brand, email : data.val().email , recive_email: data.val().recive_email,sendUser :data.val().uuid,os : data.val().version, content:data.val().content, photo: url})
           }).catch(function (error) {
 
           })
         } else {
-          todos.unshift({name: data.val().text, userId: data.val().uid, noticekey: data.key})
+          suggestList.unshift({brand: data.val().brand, email : data.val().email , recive_email: data.val().recive_email,sendUser :data.val().uuid,os : data.val().version, content:data.val().content})
         }
-      });
-
-      let noticeData = noticeRef;
-      noticeData.on('value', function (snapshot) {
-        //updateStarCount(postElement, snapshot.val());
       });
     },
     methods: {
-      deleteTodo(i) {
-        if (confirm("정말 공지를 삭제하시겠습니까?") === true) {
-          noticeRef.child(this.todos[i].noticekey).remove()
-          this.todos.splice(0, 1)
-
+      judgment(email) {
+        if (confirm(email + "답변을 하시겠습니까??") === true) {
+          //suggestRef.child(this.suggestList[i].noticekey).remove()
+          //this.suggestList.splice(0, 1)
         }
-      },
-      createTodo(text) {
-        if (text != null) {
-          if (confirm("정말 공지를 등록하시겠습니까?") === true) {
-
-            let name = this.name
-            let uid = this.userId
-            let selectedFile = document.getElementById('image').files[0]
-            if (selectedFile != null) {
-              storageRef.child(selectedFile.name).put(selectedFile).then(function (snapshot) {
-
-                noticeRef.push({
-                  name: name,
-                  photo: snapshot.downloadURL,
-                  uid: uid,
-                  writeDate: Date.now(),
-                  text: text
-                });
-              })
-            } else {
-              noticeRef.push({
-                name: name,
-                uid: uid,
-                writeDate: Date.now(),
-                text: text
-              });
-            }
-          }
-        }
-      },
-      detailImg(url) {
-        console.log("dsadsad")
-        let img1 = new Image();
-        img1.src = (url);
-        if ((img1.width != 0) && (img1.height != 0)) {
-          let W = img1.width;
-          let H = img1.height;
-          let O = "width=" + W + ",height=" + H + ",scrollbars=yes";
-          let imgWin = window.open("", "", O);
-          imgWin.document.write("<html><head><title>:*:*:*: 이미지상세보기 :*:*:*:*:*:*:</title></head>");
-          imgWin.document.write("<body topmargin=0 leftmargin=0>");
-          imgWin.document.write("<img src=" + url + " onclick='self.close()' style='cursor:pointer;' title ='클릭하시면 창이 닫힙니다.'>");
-          imgWin.document.close();
-
-        }
-        else {
-          let controller = "imgControll('" + url + "')";
-          intervalID = setTimeout(controller, 20);
-        }
-
-
       }
     }
   }
@@ -176,7 +107,9 @@
     list-style-type: none;
     padding: 0;
   }
-  span { display: block }
+  span { display: block;
+  text-align: left;
+  margin-left: 30px}
 
   li {
     margin: 0 10px;
