@@ -17,7 +17,7 @@
 	</span>
     </div>
     <ul class="list-group">
-      <li class="list-group-item" v-for="(todo, index) in todos" >
+      <li class="list-group-item" v-for="(todo, index) in todos">
         <span>
         <img v-if="todo.photo" v-bind:src="todo.photo"
              height="200"
@@ -171,7 +171,10 @@
     list-style-type: none;
     padding: 0;
   }
-  span { display: block }
+
+  span {
+    display: block
+  }
 
   li {
     margin: 0 10px;

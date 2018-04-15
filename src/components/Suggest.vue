@@ -4,7 +4,7 @@
     <h2>{{userId}}</h2>
 
     <ul class="list-group">
-      <li class="list-group-item" v-for="(suggest, index) in suggestList" >
+      <li class="list-group-item" v-for="(suggest, index) in suggestList">
         <span>
         <img v-if="suggest.photo" v-bind:src="suggest.photo"
              height="200"
@@ -21,7 +21,19 @@
              style="font-size: 12px; line-height: 1;">
           <ul>
             <li>
-              <a href="#" @click="judgment(suggest.recive_email)">답변하기</a>
+              <div class="input-group" style="margin-bottom:10px;">
+                <textarea class="form-control"
+                       placeholder="내용을 입력해주세요"
+                       v-model="text"
+                       v-on:keyup.enter="createTodo(text)"
+                          rows="10"
+                          cols="50"
+                ></textarea>
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="button"
+                            @click="judgment(suggest.recive_email)">답변하기</button>
+              	  </span>
+              </div>
             </li>
           </ul>
         </div>
@@ -51,7 +63,7 @@
         name: String,
         email: String,
         user: {},
-        suggestList : []
+        suggestList: []
       }
     },
     created: function () {
@@ -76,18 +88,33 @@
             xhr.open('GET', url);
             xhr.send();
 
-            suggestList.unshift({brand: data.val().brand, email : data.val().email , recive_email: data.val().recive_email,sendUser :data.val().uuid,os : data.val().version, content:data.val().content, photo: url})
+            suggestList.unshift({
+              brand: data.val().brand,
+              email: data.val().email,
+              recive_email: data.val().recive_email,
+              sendUser: data.val().uuid,
+              os: data.val().version,
+              content: data.val().content,
+              photo: url
+            })
           }).catch(function (error) {
 
           })
         } else {
-          suggestList.unshift({brand: data.val().brand, email : data.val().email , recive_email: data.val().recive_email,sendUser :data.val().uuid,os : data.val().version, content:data.val().content})
+          suggestList.unshift({
+            brand: data.val().brand,
+            email: data.val().email,
+            recive_email: data.val().recive_email,
+            sendUser: data.val().uuid,
+            os: data.val().version,
+            content: data.val().content
+          })
         }
       });
     },
     methods: {
       judgment(email) {
-        if (confirm(email + "답변을 하시겠습니까??") === true) {
+        if (confirm("답변을 하시겠습니까??") === true) {
           //suggestRef.child(this.suggestList[i].noticekey).remove()
           //this.suggestList.splice(0, 1)
         }
@@ -107,9 +134,12 @@
     list-style-type: none;
     padding: 0;
   }
-  span { display: block;
-  text-align: left;
-  margin-left: 30px}
+
+  span {
+    display: block;
+    text-align: left;
+    margin-left: 30px
+  }
 
   li {
     margin: 0 10px;
