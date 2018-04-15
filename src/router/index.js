@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import HelloWorld from '@/components/HelloWorld'
 import Notices from '@/components/Notice'
 import Reports from '@/components/Report'
+import Suggest from '@/components/Suggest'
 import Auth from '@/components/Auth'
 import AuthSuccess from '@/components/AuthSuccess'
 
@@ -25,6 +26,10 @@ export default new Router({
       path: '/report',
       name: 'Report',
       component: Reports
+    }, {
+      path: '/suggest',
+      name: 'Suggest',
+      component: Suggest
     }
   ],
   mode: 'history'

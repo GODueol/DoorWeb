@@ -4,6 +4,7 @@
     <b-nav tabs>
       <b-nav-item v-if="menuSeen"> <router-link to="/notice">Notice</router-link> </b-nav-item>
       <b-nav-item v-if="menuSeen"> <router-link to="/report">Report</router-link> </b-nav-item>
+      <b-nav-item v-if="menuSeen"> <router-link to="/suggest">Suggest</router-link> </b-nav-item>
       <b-nav-item v-if="menuSeen" v-on:click="logOut"> Logout </b-nav-item>
     </b-nav>
 
@@ -13,6 +14,18 @@
 
 <script>
 import firebase from 'firebase'
+
+export const config = {
+  apiKey: 'AIzaSyBvt4z9T0Db3aM-1tCocjrBbC62Ch6QY-8',
+  authDomain: 'core-865fc.firebaseapp.com',
+  databaseURL: 'https://core-865fc.firebaseio.com',
+  projectId: 'core-865fc',
+  storageBucket: 'core-865fc.appspot.com',
+  messagingSenderId: '699214818051'
+}
+
+
+firebase.initializeApp(config);
 
 export default {
   name: 'App',

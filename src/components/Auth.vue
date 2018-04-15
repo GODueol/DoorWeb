@@ -5,6 +5,7 @@
 <script>
 import firebase from 'firebase'
 import firebaseui from 'firebaseui'
+
 export default {
   name: 'auth',
   mounted: function () {

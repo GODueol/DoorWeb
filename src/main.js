@@ -21,7 +21,6 @@ new Vue({
   el: '#app',
   router,
   created: function () {
-    firebase.initializeApp(config)
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
         this.$router.push('/success')

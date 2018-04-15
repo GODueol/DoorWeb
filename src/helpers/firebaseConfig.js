@@ -7,3 +7,4 @@ export const config = {
   storageBucket: 'core-865fc.appspot.com',
   messagingSenderId: '699214818051'
 }
+
