@@ -48,6 +48,15 @@
 <script>
   import firebase from 'firebase'
 
+  const config2 = {
+    mailer: {
+      service: 'Gmail',
+      host: 'localhost',
+      port: '465',
+      user: 'coreapp0729@gmail.com',
+      password: 'zjvlqlswlgk1cmd',
+    },
+  };
   let db = firebase.database();
   let suggestRef = db.ref('suggestion');
   let storageRef = firebase.storage().ref('notice');
@@ -115,8 +124,6 @@
     methods: {
       judgment(email) {
         if (confirm("답변을 하시겠습니까??") === true) {
-          //suggestRef.child(this.suggestList[i].noticekey).remove()
-          //this.suggestList.splice(0, 1)
         }
       }
     }
