@@ -1,8 +1,50 @@
 const functions = require('firebase-functions');
+// The Firebase Admin SDK to access the Firebase Realtime Database.
+const admin = require('firebase-admin');
+admin.initializeApp(functions.config().firebase);
 
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
-// exports.helloWorld = functions.https.onRequest((request, response) => {
-//  response.send("Hello from Firebase!");
-// });
+
+// https 트리거 테스트
+exports.addMessage = functions.https.onRequest((req, res) => {
+  // Grab the text parameter.
+  const original = req.query.text;
+  // Push the new message into the Realtime Database using the Firebase Admin SDK.
+  return admin.database().ref('/messages').push({original: original}).then((snapshot) => {
+    // Redirect with 303 SEE OTHER to the URL of the pushed object in the Firebase console.
+    return res.redirect(303, snapshot.ref);
+  });
+});
+
+
+// 유저가 제거되었을때 (채팅방 제거, 알림제거)
+exports.deleteUser = functions.database.ref('/users/{userId}')
+  .onDelete(event => {
+    var eventSnapshot = event.data.previous.val();
+
+    return admin.database().ref('/log').push({original:eventSnapshot.id})
+  });
+
+
+
+// 채팅방 제거시 상대방 채팅방 제거 동기화 및 체팅 로그 제거
+exports.deleteChatRoom = functions.database.ref('/chatRoomList/{userId}/{targetId}')
+  .onDelete((event) => {
+    var eventSnapshot = event.data.previous.val();
+
+    // 연관된 채팅 기록id
+    admin.database().ref('/log').push({image:eventSnapshot.chatRoomid})
+    // 상대방 채팅방 id
+    return admin.database().ref('/log').push({image:event.params.targetId})
+  });
+
+
+
+// 채팅 로그가 사라졌을떄 (채팅에 묶인 이미지 제거)
+exports.deleteChatMessage = functions.database.ref('/chat/{roomId}/{messageId}')
+  .onDelete((event) => {
+    var eventSnapshot = event.data.previous.val();
+
+    //해당 이미지 url
+    admin.database().ref('/log').push({image:eventSnapshot.image})
+    return admin.database().ref('/log').push({image:event.params.messageId})
+  });
