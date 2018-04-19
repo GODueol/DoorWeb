@@ -19,10 +19,10 @@
     <ul class="list-group">
       <li class="list-group-item" v-for="(todo, index) in todos">
         <span>
-        <img v-if="todo.photo" v-bind:src="todo.photo"
+        <img v-if="todo.pictureUrl" v-bind:src="todo.pictureUrl"
              height="200"
              weight="200"
-             @click="detailImg(todo.photo)">
+             @click="detailImg(todo.pictureUrl)">
           </span>
         {{todo.name}}
         <div class="btn-group pull-right"
@@ -73,9 +73,9 @@
       let todos = this.todos;
       noticeRef.on('child_added', function (data) {
 
-        if (data.val().photo != null) {
+        if (data.val().pictureUrl != null) {
 
-          firebase.storage().refFromURL(data.val().photo).getDownloadURL().then(function (url) {
+          firebase.storage().refFromURL(data.val().pictureUrl).getDownloadURL().then(function (url) {
             var xhr = new XMLHttpRequest();
             xhr.responseType = 'blob';
             xhr.onload = function (event) {
@@ -88,7 +88,7 @@
             //var img = document.getElementById('listimage');
             //img.src = url;
 
-            todos.unshift({name: data.val().text, userId: data.val().uid, noticekey: data.key, photo: url})
+            todos.unshift({name: data.val().text, userId: data.val().uid, noticekey: data.key, pictureUrl: url})
           }).catch(function (error) {
 
           })
@@ -117,7 +117,7 @@
 
                 noticeRef.push({
                   name: name,
-                  photo: snapshot.downloadURL,
+                  pictureUrl: snapshot.downloadURL,
                   uid: uid,
                   writeDate: Date.now(),
                   text: text
