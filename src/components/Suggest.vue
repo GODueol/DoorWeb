@@ -24,14 +24,14 @@
               <div class="input-group" style="margin-bottom:10px;">
                 <textarea class="form-control"
                        placeholder="내용을 입력해주세요"
-                       v-model="text"
+                       v-model="suggest.contents"
                        v-on:keyup.enter="createTodo(text)"
                           rows="10"
                           cols="50"
                 ></textarea>
                   <span class="input-group-btn">
                     <button class="btn btn-default" type="button"
-                            @click="judgment(suggest.recive_email)">답변하기</button>
+                            @click="judgment(suggest.recive_email, suggest.contents)">답변하기</button>
               	  </span>
               </div>
             </li>
@@ -60,6 +60,7 @@
   let db = firebase.database();
   let suggestRef = db.ref('suggestion');
   let storageRef = firebase.storage().ref('notice');
+  let sendMailLogsRef = db.ref('sendMailLogs');
   export default {
 
     name: 'Notice',
@@ -72,7 +73,7 @@
         name: String,
         email: String,
         user: {},
-        suggestList: []
+        suggestList: [],
       }
     },
     created: function () {
@@ -122,8 +123,18 @@
       });
     },
     methods: {
-      judgment(email) {
+      judgment(email, contents) {
         if (confirm("답변을 하시겠습니까??") === true) {
+          // 메일 보내기
+          var timestamp = new Date().getTime();
+
+          // DB insert
+          sendMailLogsRef.push({
+            targetEmail : email,
+            writeDate : timestamp,
+            contents : contents
+          })
+
         }
       }
     }

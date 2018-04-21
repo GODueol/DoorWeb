@@ -1,6 +1,7 @@
 const functions = require('firebase-functions');
 // The Firebase Admin SDK to access the Firebase Realtime Database.
 const admin = require('firebase-admin');
+const nodemailer = require('nodemailer');
 admin.initializeApp(functions.config().firebase);
 
 
@@ -48,3 +49,47 @@ exports.deleteChatMessage = functions.database.ref('/chat/{roomId}/{messageId}')
     admin.database().ref('/log').push({image:eventSnapshot.image})
     return admin.database().ref('/log').push({image:event.params.messageId})
   });
+
+
+
+// Admin Email
+const adminEmail = "coreapp0729@gmail.com";
+const mailTransport = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: adminEmail,
+    pass: "zjvlqlswlgk1cmd",
+  },
+});
+
+// Sends a welcome email to the given user.
+function sendReplySuggestEmail(email, contents) {
+  const mailOptions = {
+    from: adminEmail,
+    to: email,
+  };
+
+  // The user subscribed to the newsletter.
+  mailOptions.subject = `Core Reply`;
+  mailOptions.text = contents;
+  return mailTransport.sendMail(mailOptions).then(() => {
+    return console.log('New Reply email sent to:', email);
+  });
+}
+
+
+/*
+ [sendMailLogs]
+ pushId : {
+  targetEmail : "",
+  writeDate : "",
+  contents : ""
+ }
+ */
+exports.sendMail = functions.database.ref('/sendMailLogs/{pushId}').onWrite((event) => {
+  const eventSnapshot = event.data;
+  const targetEmail = eventSnapshot.child('targetEmail').val();
+  const contents = eventSnapshot.child('contents').val();
+
+  sendReplySuggestEmail(targetEmail, contents);
+});
