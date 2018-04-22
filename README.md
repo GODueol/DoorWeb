@@ -18,6 +18,9 @@ npm install && npm install ./functions
 # 빌드 후 배포 방법 (앞에 두 단계가 완료되어있어야하고, 터미널 명령임)
 npm run build && firebase deploy
 
+# cloudFunction 배포 방법
+firebase deploy --only functions
+
 # serve with hot reload at localhost:8080
 npm run dev
 

@@ -2,6 +2,7 @@ const functions = require('firebase-functions');
 // The Firebase Admin SDK to access the Firebase Realtime Database.
 const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
+
 admin.initializeApp(functions.config().firebase);
 
 
@@ -22,7 +23,10 @@ exports.deleteUser = functions.database.ref('/users/{userId}')
   .onDelete(event => {
     var eventSnapshot = event.data.previous.val();
 
-    return admin.database().ref('/log').push({original:eventSnapshot.id})
+    admin.database.ref('/Alarm/'+event.params.userId).remove()
+    return  admin.database.ref('/chatRoomList/'+event.params.userId).remove()
+
+    // return admin.database().ref('/log').push({original:eventSnapshot.id})
   });
 
 
@@ -32,10 +36,15 @@ exports.deleteChatRoom = functions.database.ref('/chatRoomList/{userId}/{targetI
   .onDelete((event) => {
     var eventSnapshot = event.data.previous.val();
 
-    // 연관된 채팅 기록id
-    admin.database().ref('/log').push({image:eventSnapshot.chatRoomid})
+    // 상대방 채팅룸 지우기
+    admin.database.ref('/chatRoomList/'+event.params.targetId+'/'+event.params.userId).remove()
     // 상대방 채팅방 id
-    return admin.database().ref('/log').push({image:event.params.targetId})
+    //return admin.database().ref('/log').push({image:event.params.targetId})
+
+    // 연관된 채팅 기록id
+    return admin.database.ref('/chat/'+eventSnapshot.chatRoomid).remove()
+    // 채팅 log id
+    //admin.database().ref('/log').push({image:eventSnapshot.chatRoomid})
   });
 
 
@@ -45,9 +54,11 @@ exports.deleteChatMessage = functions.database.ref('/chat/{roomId}/{messageId}')
   .onDelete((event) => {
     var eventSnapshot = event.data.previous.val();
 
+    // 실패ㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐ
+    const bucket = admin.storage.bucket('core-865fc.appspot.com')
+    return bucket.file(eventSnapshot.image).delete()
     //해당 이미지 url
-    admin.database().ref('/log').push({image:eventSnapshot.image})
-    return admin.database().ref('/log').push({image:event.params.messageId})
+    //admin.database().ref('/log').push({image:eventSnapshot.image})
   });
 
 
