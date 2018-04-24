@@ -4,16 +4,19 @@
     <h2>{{userId}}</h2>
     <div class="input-group" style="margin-bottom:10px;">
       <input type="text" class="form-control"
-             placeholder="할일을 입력하세요"
+             placeholder="제목을 입력하세요"
+             v-model="title">
+      <input type="text" class="form-control"
+             placeholder="내용을 입력하세요"
              v-model="text"
-             v-on:keyup.enter="createTodo(text)">
+             v-on:keyup.enter="createTodo(title, text)">
       <input type="file"
              id="image"
              accept=".jpg, .jpeg, .png"
              multiple>
       <span class="input-group-btn">
 		<button class="btn btn-default" type="button"
-            @click="createTodo(text)">추가</button>
+            @click="createTodo(title, text)">추가</button>
 	</span>
     </div>
     <ul class="list-group">
@@ -105,32 +108,39 @@
 
         }
       },
-      createTodo(text) {
-        if (text != null) {
-          if (confirm("정말 공지를 등록하시겠습니까?") === true) {
+      createTodo(title, text) {
+        if(title == null){
+          alert("제목을 입력하세요")
+        }
+        if (text == null) {
+          alert("내용을 입력하세요")
+        }
 
-            let name = this.name
-            let uid = this.userId
-            let selectedFile = document.getElementById('image').files[0]
-            if (selectedFile != null) {
-              storageRef.child(selectedFile.name).put(selectedFile).then(function (snapshot) {
+        if (confirm("정말 공지를 등록하시겠습니까?") === true) {
 
-                noticeRef.push({
-                  name: name,
-                  pictureUrl: snapshot.downloadURL,
-                  uid: uid,
-                  writeDate: Date.now(),
-                  text: text
-                });
-              })
-            } else {
+          let name = this.name
+          let uid = this.userId
+          let selectedFile = document.getElementById('image').files[0]
+          if (selectedFile != null) {
+            storageRef.child(selectedFile.name).put(selectedFile).then(function (snapshot) {
+
               noticeRef.push({
                 name: name,
+                pictureUrl: snapshot.downloadURL,
                 uid: uid,
                 writeDate: Date.now(),
-                text: text
+                text: text,
+                title : title
               });
-            }
+            })
+          } else {
+            noticeRef.push({
+              name: name,
+              uid: uid,
+              writeDate: Date.now(),
+              text: text,
+              title : title
+            });
           }
         }
       },
