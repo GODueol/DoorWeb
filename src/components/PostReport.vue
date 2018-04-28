@@ -13,6 +13,17 @@
             Email :
             {{reportUser.user.email}}
           </div>
+
+          <div v-if="reportUser.prevent">
+            제재횟수 :
+            {{reportUser.prevent.preventCount}}
+          </div>
+
+          <div v-if="reportUser.prevent && reportUser.prevent.releaseDate">
+            제재 해제 시점 :
+            {{getDate(reportUser.prevent.releaseDate)}}
+          </div>
+
         </div>
 
         <!-- 코어별 -->
@@ -27,6 +38,9 @@
                 </div>
                 <div>
                   postKey : {{postIndex}}
+                </div>
+                <div>
+                  isCloud : {{post.post.isCloud}}
                 </div>
 
                 <!-- Post 정보 -->
@@ -60,15 +74,15 @@
                       </h4>
                       <!-- 신고자별 -->
                       <div>
-                        <div class="list-group-item" v-for="(reportUser, reportUserIndex) in report">
+                        <div class="list-group-item" v-for="(reportedUser, reportedUserIndex) in report">
                           <div>
-                            신고자 : {{reportUserIndex}}
+                            신고자 : {{reportedUserIndex}}
                           </div>
                           <div>
-                            신고내용 : {{reportUser.contents}}
+                            신고내용 : {{reportedUser.contents}}
                           </div>
                           <div>
-                            신고날 : {{getDate(reportUser.date)}}
+                            신고날 : {{getDate(reportedUser.date)}}
                           </div>
 
                           <!--버튼-->
@@ -77,7 +91,7 @@
                               조치
                             </button>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                              <a class="dropdown-item" href="#">포스트 삭제 / 7일 업로드 중지</a>
+                              <a class="dropdown-item" @click="setPrevent(reportUser.uuid, coreIndex, postIndex, reportIndex, reportedUserIndex, reportedUser, post.post)">포스트 삭제 / 7일 업로드 중지</a>
                               <a class="dropdown-item" href="#">삭제</a>
                               <a class="dropdown-item" href="#">계정 정지</a>
                             </div>
@@ -141,18 +155,17 @@
         this.userId = this.user.uid
       }
 
-      var reportUsers = this.reportUsers;
-      reportUserRef.once('value', function (snapshot) {
+      let reportUsers = this.reportUsers;
+      reportUserRef.on('value', function (snapshot) {
+        reportUsers.length = 0
         snapshot.forEach(function (childSnapshot) {
-          var child = {};
+          const child = {};
           child["uuid"] = childSnapshot.key;
           child["cores"] = childSnapshot.val();
 
           // get Post
           Object.keys(child["cores"]).map(function(cUuid) {
-            var core = child["cores"][cUuid];
-
-
+            const core = child["cores"][cUuid];
             Object.keys(core).map(function(postKey) {
               let postRef = db.ref('posts/' + cUuid + "/" + postKey);
 
@@ -160,15 +173,20 @@
                 core[postKey]["post"] = postSnapshot.val();
               });
             });
-
-            console.log(core);
           });
 
           // get profile
           let userRef = db.ref('users/' + childSnapshot.key);
+          let preventUserRef = db.ref('prevents/post/' + childSnapshot.key);
           userRef.once('value', function (userSnapshot) {
             child["user"] = userSnapshot.val();
-            reportUsers.push(child);
+
+            // get prevent
+            preventUserRef.once('value', preventSnapshot =>{
+              child["prevent"] = preventSnapshot.val();
+              reportUsers.push(child);
+            });
+
           });
         });
       })
@@ -176,6 +194,56 @@
     methods: {
       getDate(date) {
         return new Date(date).toLocaleString();
+      },
+      setPrevent(reportedUuid, cUuid, postKey, type, reporterUuid, reportObj, postObj){
+        console.log(reportedUuid, cUuid, postKey, type, reporterUuid, reportObj, postObj);
+
+        // 제재 내역 추가
+        let preventRef = db.ref('prevents/post/' + reportedUuid);
+        preventRef.once('value', snapshot => {
+          const preventObj = snapshot.val();
+          let preventCount = 1;
+          if(preventObj !== null){
+            preventCount = preventObj.preventCount+1;
+          }
+
+          const releaseDate = this.afterWeek(1);
+          preventRef.set({
+            cUuid : cUuid,
+            postKey : postKey,
+            reportType : type,
+            reporterUuid : reporterUuid,
+            reportContents : reportObj.contents,
+            reportDate : reportObj.date,
+            releaseDate : releaseDate,
+            preventCount : preventCount
+          });
+        });
+
+        // 사진, 음성 삭제
+        var storage = firebase.storage();
+        if("pictureUrl" in postObj) storage.refFromURL(postObj.pictureUrl).delete();
+        if("soundUrl" in postObj) storage.refFromURL(postObj.soundUrl).delete();
+
+        // 포스트 삭제
+        let postRef = db.ref('posts/' + cUuid + "/" + postKey);
+        postRef.remove();
+
+        // 신고 내역 삭제
+        let reportUserRef = db.ref('reports/posts/' + reportedUuid + "/" + cUuid + "/" + postKey);
+        reportUserRef.remove();
+
+        // TODO : 메세지 보내기 => 요부분은 주열이가 해야할듯..
+        // 코어 관리자한테 메세지 받고, 그사람이 관리자 계정에 메세지를 하면 어떻게되나
+        // 허위 신고자에 대한 제재는?
+
+
+      },
+      afterWeek(weeks) {
+        const d = new Date();
+        const dayOfMonth = d.getDate();
+        d.setDate(dayOfMonth + 7*weeks);
+        return d.getTime()
       }
     }
   }

@@ -109,7 +109,8 @@
       }
 
       var reportUsers = this.reportUsers;
-      reportUserRef.once('value', function (snapshot) {
+      reportUserRef.on('value', function (snapshot) {
+        reportUsers.length = 0;
         snapshot.forEach(function (childSnapshot) {
           const child = {};
           child["uuid"] = childSnapshot.key;
