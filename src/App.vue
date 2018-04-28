@@ -3,7 +3,7 @@
 
     <b-nav tabs>
       <b-nav-item v-if="menuSeen"> <router-link to="/notice">Notice</router-link> </b-nav-item>
-      <b-nav-item v-if="menuSeen"> <router-link to="/report">Report</router-link> </b-nav-item>
+      <b-nav-item v-if="menuSeen"> <router-link to="/report/user">User Report</router-link> </b-nav-item>
       <b-nav-item v-if="menuSeen"> <router-link to="/suggest">Suggest</router-link> </b-nav-item>
       <b-nav-item v-if="menuSeen" v-on:click="logOut"> Logout </b-nav-item>
     </b-nav>
@@ -56,7 +56,6 @@ export default {
   font-family: 'Avenir', Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
 }
 </style>

@@ -46,6 +46,7 @@
 
 <script>
   import firebase from 'firebase'
+  import 'bootstrap'
 
   let db = firebase.database();
   let noticeRef = db.ref('notice');
@@ -163,8 +164,6 @@
           let controller = "imgControll('" + url + "')";
           intervalID = setTimeout(controller, 20);
         }
-
-
       }
     }
   }
