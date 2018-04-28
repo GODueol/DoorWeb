@@ -9,6 +9,16 @@
           <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl1"
                height="200"
                weight="200">
+          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl2"
+               height="200"
+               weight="200">
+          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl3"
+               height="200"
+               weight="200">
+          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl4"
+               height="200"
+               weight="200">
+
           <div>
             Email :
             {{reportUser.user.email}}
@@ -72,7 +82,6 @@
   import firebase from 'firebase'
 
   let db = firebase.database();
-  let reportRef = db.ref('reports');
   let reportUserRef = db.ref('reports/users');
 
 

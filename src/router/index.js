@@ -3,6 +3,7 @@ import Router from 'vue-router'
 import HelloWorld from '@/components/HelloWorld'
 import Notices from '@/components/Notice'
 import Reports from '@/components/Report'
+import PostReport from '@/components/PostReport'
 import Suggest from '@/components/Suggest'
 import Auth from '@/components/Auth'
 import AuthSuccess from '@/components/AuthSuccess'
@@ -24,12 +25,16 @@ export default new Router({
       component: Notices
     }, {
       path: '/report/user',
-      name: 'Report',
+      name: 'User Report',
       component: Reports
     }, {
       path: '/suggest',
       name: 'Suggest',
       component: Suggest
+    }, {
+      path: '/report/post',
+      name: 'Post Report',
+      component: PostReport
     }
   ],
   mode: 'history'
