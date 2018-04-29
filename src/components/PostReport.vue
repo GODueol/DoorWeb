@@ -6,9 +6,10 @@
 
         <!-- 신고된 유저 정보 -->
         <div class="col-sm-6 col-md-4">
-          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl1"
-               height="200"
-               weight="200">
+          <div>
+            Email :
+            {{reportUser.user.email}}
+          </div>
           <div>
             Email :
             {{reportUser.user.email}}
@@ -24,6 +25,7 @@
             {{getDate(reportUser.prevent.releaseDate)}}
           </div>
 
+          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl1" class="img-thumbnail"/>
         </div>
 
         <!-- 코어별 -->

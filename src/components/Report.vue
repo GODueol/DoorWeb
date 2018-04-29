@@ -1,33 +1,69 @@
 <template>
   <div>
     <!-- 신고된 유저별 -->
-    <div class="list-group-item" v-for="(reportUser, index) in reportUsers">
+    <div class="list-group-item col-md-auto row" v-for="(reportUser, index) in reportUsers">
       <div class="row">
 
         <!-- 신고된 유저 정보 -->
         <div class="col-sm-6 col-md-4">
-          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl1"
-               height="200"
-               weight="200">
-          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl2"
-               height="200"
-               weight="200">
-          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl3"
-               height="200"
-               weight="200">
-          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl4"
-               height="200"
-               weight="200">
 
           <div>
-            Email :
-            {{reportUser.user.email}}
+            Email : {{reportUser.user.email}}
           </div>
+
+          <div>
+            Name : {{reportUser.user.id}}
+          </div>
+
+          <div>
+            Profile : {{reportUser.user.totalProfile}}
+          </div>
+
+          <div :id="reportUser.uuid" class="carousel slide" data-ride="carousel" data-interval="false" >
+            <ol class="carousel-indicators">
+              <li v-if="reportUser.user.picUrls.picUrl1" data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+              <li v-if="reportUser.user.picUrls.picUrl2" data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+              <li v-if="reportUser.user.picUrls.picUrl3" data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+              <li v-if="reportUser.user.picUrls.picUrl4" data-target="#carouselExampleIndicators" data-slide-to="3"></li>
+            </ol>
+            <div class="carousel-inner">
+              <div class="carousel-item active" v-if="reportUser.user.picUrls.picUrl1">
+                <img class="d-block w-100" v-bind:src="reportUser.user.picUrls.picUrl1" alt="First slide">
+              </div>
+              <div class="carousel-item" v-if="reportUser.user.picUrls.picUrl2">
+                <img class="d-block w-100" v-bind:src="reportUser.user.picUrls.picUrl2" alt="Second slide">
+              </div>
+              <div class="carousel-item" v-if="reportUser.user.picUrls.picUrl3">
+                <img class="d-block w-100" v-bind:src="reportUser.user.picUrls.picUrl3" alt="Third slide">
+              </div>
+
+              <div class="carousel-item" v-if="reportUser.user.picUrls.picUrl4">
+                <img class="d-block w-100" v-bind:src="reportUser.user.picUrls.picUrl4" alt="Third slide">
+              </div>
+            </div>
+            <a class="carousel-control-prev" :href="'#'+reportUser.uuid" role="button" data-slide="prev">
+              <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+              <span class="sr-only">Previous</span>
+            </a>
+            <a class="carousel-control-next" :href="'#'+reportUser.uuid" role="button" data-slide="next">
+              <span class="carousel-control-next-icon" aria-hidden="true"></span>
+              <span class="sr-only">Next</span>
+            </a>
+          </div>
+<!--
+
+          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl1" class="img-thumbnail">
+          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl2" class="img-thumbnail">
+          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl3" class="img-thumbnail">
+          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl4" class="img-thumbnail">
+-->
+
+
         </div>
 
         <!-- 신고 유형별 -->
-        <div>
-          <div class="list-group-item" v-for="(report, reportIndex) in reportUser.report">
+        <div class="col-md-auto">
+          <div class="list-group-item col-md-auto" v-for="(report, reportIndex) in reportUser.report">
             <!-- 신고 유형 -->
             <h4>
             {{reportIndex}}
@@ -52,8 +88,8 @@
                     조치
                   </button>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item" href="#">포스트 삭제 / 7일 업로드 중지</a>
-                    <a class="dropdown-item" href="#">삭제</a>
+                    <a class="dropdown-item" href="#">프로필 사진 삭제 삭제 / 7일 업로드 중지</a>
+                    <a class="dropdown-item" href="#">신고 삭제</a>
                     <a class="dropdown-item" href="#">계정 정지</a>
                   </div>
                 </div>
@@ -64,14 +100,6 @@
         </div>
 
 
-        <div class="btn-group pull-right"
-             style="font-size: 12px; line-height: 1;">
-          <ul>
-            <li>
-              <a href="#" @click="deleteTodo(index)">삭제</a>
-            </li>
-          </ul>
-        </div>
 
       </div>
     </div>
@@ -147,5 +175,9 @@ ul {
 li {
   display: inline-block;
   margin: 0 10px;
+}
+.carousel-item{
+  overflow: auto;
+
 }
 </style>
