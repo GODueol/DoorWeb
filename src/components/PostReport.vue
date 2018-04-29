@@ -92,7 +92,7 @@
                             </button>
                             <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                               <a class="dropdown-item" @click="setPrevent(reportUser.uuid, coreIndex, postIndex, reportIndex, reportedUserIndex, reportedUser, post.post)">포스트 삭제 / 7일 업로드 중지</a>
-                              <a class="dropdown-item" href="#">삭제</a>
+                              <a class="dropdown-item" @click="deletePreventAndSendMessage(reportUser.uuid, coreIndex, postIndex, reportIndex, reportedUserIndex)">신고 삭제</a>
                               <a class="dropdown-item" href="#">계정 정지</a>
                             </div>
                           </div>
@@ -198,45 +198,60 @@
       setPrevent(reportedUuid, cUuid, postKey, type, reporterUuid, reportObj, postObj){
         console.log(reportedUuid, cUuid, postKey, type, reporterUuid, reportObj, postObj);
 
-        // 제재 내역 추가
+        if (!confirm("정말 조치를 하시겠습니까?")) return;
+
+        // 제재 내역 조회
         let preventRef = db.ref('prevents/post/' + reportedUuid);
         preventRef.once('value', snapshot => {
           const preventObj = snapshot.val();
-          let preventCount = 1;
-          if(preventObj !== null){
-            preventCount = preventObj.preventCount+1;
+
+          // 현재 재재중이면 포스트 삭제만
+          let releaseDate = preventObj.releaseDate;
+          const now = new Date().getTime();
+
+          // 제재기간이 아닐때만 제재
+          if(releaseDate <= now){
+            // 제재
+            let preventCount = 1;
+            if(preventObj !== null){
+              preventCount = preventObj.preventCount+1;
+            }
+            releaseDate = this.afterWeek(1);  // releaseDate 갱신
+            preventRef.set({
+              cUuid : cUuid,
+              postKey : postKey,
+              reportType : type,
+              reporterUuid : reporterUuid,
+              reportContents : reportObj.contents,
+              reportDate : reportObj.date,
+              releaseDate : releaseDate,
+              preventCount : preventCount
+            });
           }
 
-          const releaseDate = this.afterWeek(1);
-          preventRef.set({
-            cUuid : cUuid,
-            postKey : postKey,
-            reportType : type,
-            reporterUuid : reporterUuid,
-            reportContents : reportObj.contents,
-            reportDate : reportObj.date,
-            releaseDate : releaseDate,
-            preventCount : preventCount
-          });
+          deleteMedia(postObj);
+          deletePost(cUuid, postKey);
+          this.deletePrevent(reportedUuid, cUuid, postKey);
+
+          // TODO : 철혁님 기획 완료되면 수정할 것
+          const msg = "당신은 '" + type + "'로 신고되어 제재 당했습니다";
+          this.sendMessge(reportedUuid, msg);
         });
 
         // 사진, 음성 삭제
-        var storage = firebase.storage();
-        if("pictureUrl" in postObj) storage.refFromURL(postObj.pictureUrl).delete();
-        if("soundUrl" in postObj) storage.refFromURL(postObj.soundUrl).delete();
+        function deleteMedia(postObj){
+          const storage = firebase.storage();
+          if("pictureUrl" in postObj) storage.refFromURL(postObj.pictureUrl).delete();
+          if("soundUrl" in postObj) storage.refFromURL(postObj.soundUrl).delete();
+        }
 
         // 포스트 삭제
-        let postRef = db.ref('posts/' + cUuid + "/" + postKey);
-        postRef.remove();
-
-        // 신고 내역 삭제
-        let reportUserRef = db.ref('reports/posts/' + reportedUuid + "/" + cUuid + "/" + postKey);
-        reportUserRef.remove();
-
-        // TODO : 메세지 보내기 => 요부분은 주열이가 해야할듯..
-        // 코어 관리자한테 메세지 받고, 그사람이 관리자 계정에 메세지를 하면 어떻게되나
-        // 허위 신고자에 대한 제재는?
-
+        function deletePost(cUuid, postKey) {
+          let postRef = db.ref('posts/' + cUuid + "/" + postKey);
+          postRef.remove();
+          let cloudRef = db.ref('coreCloud/' + postKey);
+          cloudRef.remove()
+        }
 
       },
       afterWeek(weeks) {
@@ -244,6 +259,22 @@
         const dayOfMonth = d.getDate();
         d.setDate(dayOfMonth + 7*weeks);
         return d.getTime()
+      },
+      deletePrevent(reportedUuid, cUuid, postKey) {
+        let reportUserRef = db.ref('reports/posts/' + reportedUuid + "/" + cUuid + "/" + postKey);
+        reportUserRef.remove();
+      },
+      deletePreventAndSendMessage(reportedUuid, cUuid, postKey, type, reporterUuid){
+        if (!confirm("정말 신고를 삭제 하시겠습니까?")) return;
+        this.deletePrevent(reportedUuid, cUuid, postKey);
+        // TODO : 철혁님 기획 완료되면 수정할 것
+        const msg = "당신은 '" + type + "'로 신고하셨지만 허위 신고로 판단됩니다 경고드립니다";
+        this.sendMessge(reporterUuid, msg);
+
+      },
+      // TODO : 메세지 보내기 => 요부분은 주열이가 해야할듯..
+      sendMessge(targetUuid, msg){
+
       }
     }
   }
