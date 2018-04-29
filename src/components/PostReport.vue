@@ -5,7 +5,7 @@
       <div class="row">
 
         <!-- 신고된 유저 정보 -->
-        <div class="col-sm-6 col-md-4">
+        <div class="col-4">
           <div>
             Email :
             {{reportUser.user.email}}
@@ -29,11 +29,11 @@
         </div>
 
         <!-- 코어별 -->
-        <div id = "cores" >
+        <div class = "cores col-8" >
           <div v-for="(core, coreIndex) in reportUser.cores">
 
             <!-- 포스트별 -->
-            <div id = "posts" >
+            <div class = "posts" >
               <div class="list-group-item" v-for="(post, postIndex) in core">
                 <div>
                   cUuid : {{coreIndex}}
@@ -51,9 +51,7 @@
 
                   <!-- 사진 -->
 
-                  <img v-if="post.post.pictureUrl" v-bind:src="post.post.pictureUrl"
-                       height="200"
-                       weight="200">
+                  <img v-if="post.post.pictureUrl" v-bind:src="post.post.pictureUrl" class="img-thumbnail">
 
                   <!-- 내용 -->
                   <h3>{{post.post.text}} </h3>
@@ -67,7 +65,7 @@
                 </div>
 
                 <!-- 신고 유형별 -->
-                <div id = "reportTypes">
+                <div class = "reportTypes">
                   <!-- 신고 유형 -->
                   <div class="list-group-item" v-for="(report, reportIndex) in post">
                     <div v-if="reportIndex != 'post'">
@@ -112,16 +110,6 @@
           </div>
         </div>
 
-
-
-        <div class="btn-group pull-right"
-             style="font-size: 12px; line-height: 1;">
-          <ul>
-            <li>
-              <a href="#" @click="deleteTodo(index)">삭제</a>
-            </li>
-          </ul>
-        </div>
 
       </div>
     </div>

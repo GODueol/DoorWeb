@@ -5,7 +5,7 @@
       <div class="row">
 
         <!-- 신고된 유저 정보 -->
-        <div class="col-sm-6 col-md-4">
+        <div class="col-4">
 
           <div>
             Email : {{reportUser.user.email}}
@@ -62,7 +62,7 @@
         </div>
 
         <!-- 신고 유형별 -->
-        <div class="col-md-auto">
+        <div class="col-8">
           <div class="list-group-item col-md-auto" v-for="(report, reportIndex) in reportUser.report">
             <!-- 신고 유형 -->
             <h4>
