@@ -19,7 +19,17 @@
             Profile : {{reportUser.user.totalProfile}}
           </div>
 
-          <div :id="reportUser.uuid" class="carousel slide" data-ride="carousel" data-interval="false" >
+          <div v-if="reportUser.prevent">
+            제재횟수 :
+            {{reportUser.prevent.preventCount}}
+          </div>
+
+          <div v-if="reportUser.prevent && reportUser.prevent.releaseDate">
+            제재 해제 시점 :
+            {{getDate(reportUser.prevent.releaseDate)}}
+          </div>
+
+          <div v-if="reportUser.user.picUrls" :id="reportUser.uuid" class="carousel slide" data-ride="carousel" data-interval="false" >
             <ol class="carousel-indicators">
               <li v-if="reportUser.user.picUrls.picUrl1" data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
               <li v-if="reportUser.user.picUrls.picUrl2" data-target="#carouselExampleIndicators" data-slide-to="1"></li>
@@ -50,14 +60,6 @@
               <span class="sr-only">Next</span>
             </a>
           </div>
-<!--
-
-          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl1" class="img-thumbnail">
-          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl2" class="img-thumbnail">
-          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl3" class="img-thumbnail">
-          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl4" class="img-thumbnail">
--->
-
 
         </div>
 
@@ -71,15 +73,15 @@
 
             <!-- 신고자별 -->
             <div>
-              <div class="list-group-item" v-for="(reportUser, reportUserIndex) in report">
+              <div class="list-group-item" v-for="(reportedUser, reportedUserIndex) in report">
                 <div>
-                  신고자 : {{reportUserIndex}}
+                  신고자 : {{reportedUserIndex}}
                 </div>
                 <div>
-                  신고내용 : {{reportUser.contents}}
+                  신고내용 : {{reportedUser.contents}}
                 </div>
                 <div>
-                  신고날 : {{getDate(reportUser.date)}}
+                  신고날 : {{getDate(reportedUser.date)}}
                 </div>
 
                 <!--버튼-->
@@ -88,8 +90,8 @@
                     조치
                   </button>
                   <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                    <a class="dropdown-item" href="#">프로필 사진 삭제 삭제 / 7일 업로드 중지</a>
-                    <a class="dropdown-item" href="#">신고 삭제</a>
+                    <a class="dropdown-item" @click="setPrevent(reportUser.uuid, reportIndex, reportedUserIndex, reportedUser, reportUser.user)">프로필 사진 삭제 삭제 / 7일 업로드 중지</a>
+                    <a class="dropdown-item" @click="deletePreventAndSendMessage(reportUser.uuid, reportIndex, reportedUserIndex)">신고 삭제</a>
                     <a class="dropdown-item" href="#">계정 정지</a>
                   </div>
                 </div>
@@ -146,9 +148,15 @@
 
           // get profile
           let userRef = db.ref('users/' + childSnapshot.key);
+          let preventUserRef = db.ref('prevents/user/' + childSnapshot.key);
           userRef.once('value', function (userSnapshot) {
             child["user"] = userSnapshot.val();
-            reportUsers.push(child);
+
+            // get prevent
+            preventUserRef.once('value', preventSnapshot =>{
+              child["prevent"] = preventSnapshot.val();
+              reportUsers.push(child);
+            });
           });
         });
       })
@@ -156,6 +164,86 @@
     methods: {
       getDate(date) {
         return new Date(date).toLocaleString();
+      },
+      setPrevent(reportedUuid, type, reporterUuid, reportObj, userObj){
+        console.log(reportedUuid, type, reporterUuid, reportObj, userObj);
+
+        if (!confirm("정말 조치를 하시겠습니까?")) return;
+
+        // 제재 내역 조회
+        let preventRef = db.ref('prevents/user/' + reportedUuid);
+        preventRef.once('value', snapshot => {
+
+          const preventObj = snapshot.val();
+
+          // 현재 재재중이면 포스트 삭제만
+          let releaseDate = (preventObj === null? null :preventObj.releaseDate);
+          const now = new Date().getTime();
+
+          // 제재기간이 아닐때만 제재
+          if(releaseDate === null || releaseDate <= now){
+            // 제재
+            let preventCount = 1;
+            if(preventObj !== null){
+              preventCount = preventObj.preventCount+1;
+            }
+            releaseDate = this.afterWeek(1);  // releaseDate 갱신
+            preventRef.set({
+              reportType : type,
+              reporterUuid : reporterUuid,
+              reportContents : reportObj.contents,
+              reportDate : reportObj.date,
+              releaseDate : releaseDate,
+              preventCount : preventCount
+            });
+          }
+
+          deleteMedia(userObj, reportedUuid);
+          this.deletePrevent(reportedUuid);
+
+          // TODO : 철혁님 기획 완료되면 수정할 것
+          const msg = "당신은 '" + type + "'로 프로필 신고되어 프로필 삭진을 삭제당했습니다";
+          this.sendMessge(reportedUuid, msg);
+        });
+
+        // 사진 삭제
+        function deleteMedia(userObj, reportedUuid){
+          const storage = firebase.storage();
+          if("picUrl1" in userObj.picUrls) storage.refFromURL(userObj.picUrls.picUrl1).delete();
+          if("picUrl2" in userObj.picUrls) storage.refFromURL(userObj.picUrls.picUrl2).delete();
+          if("picUrl3" in userObj.picUrls) storage.refFromURL(userObj.picUrls.picUrl3).delete();
+          if("picUrl4" in userObj.picUrls) storage.refFromURL(userObj.picUrls.picUrl4).delete();
+
+          if("thumbNail_picUrl1" in userObj.picUrls) storage.refFromURL(userObj.picUrls.thumbNail_picUrl1).delete();
+          if("thumbNail_picUrl2" in userObj.picUrls) storage.refFromURL(userObj.picUrls.thumbNail_picUrl2).delete();
+          if("thumbNail_picUrl3" in userObj.picUrls) storage.refFromURL(userObj.picUrls.thumbNail_picUrl3).delete();
+          if("thumbNail_picUrl4" in userObj.picUrls) storage.refFromURL(userObj.picUrls.thumbNail_picUrl4).delete();
+
+          let userRef = db.ref('users/' + reportedUuid + "/picUrls").remove();
+        }
+
+      },
+      afterWeek(weeks) {
+        const d = new Date();
+        const dayOfMonth = d.getDate();
+        d.setDate(dayOfMonth + 7*weeks);
+        return d.getTime()
+      },
+      deletePrevent(reportedUuid) {
+        let reportUserRef = db.ref('reports/users/' + reportedUuid);
+        reportUserRef.remove();
+      },
+      deletePreventAndSendMessage(reportedUuid, type, reporterUuid){
+        if (!confirm("정말 신고를 삭제 하시겠습니까?")) return;
+        this.deletePrevent(reportedUuid);
+        // TODO : 철혁님 기획 완료되면 수정할 것
+        const msg = "당신은 '" + type + "'로 프로필 신고하셨지만 허위 신고로 판단됩니다 경고드립니다";
+        this.sendMessge(reporterUuid, msg);
+
+      },
+      // TODO : 메세지 보내기 => 요부분은 주열이가 해야할듯..
+      sendMessge(targetUuid, msg){
+
       }
     }
   }

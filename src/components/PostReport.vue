@@ -10,10 +10,6 @@
             Email :
             {{reportUser.user.email}}
           </div>
-          <div>
-            Email :
-            {{reportUser.user.email}}
-          </div>
 
           <div v-if="reportUser.prevent">
             제재횟수 :
@@ -25,7 +21,7 @@
             {{getDate(reportUser.prevent.releaseDate)}}
           </div>
 
-          <img v-if="reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl1" class="img-thumbnail"/>
+          <img v-if="reportUser.user.picUrls && reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl1" class="img-thumbnail"/>
         </div>
 
         <!-- 코어별 -->
@@ -224,7 +220,7 @@
           this.deletePrevent(reportedUuid, cUuid, postKey);
 
           // TODO : 철혁님 기획 완료되면 수정할 것
-          const msg = "당신은 '" + type + "'로 신고되어 제재 당했습니다";
+          const msg = "당신은 '" + type + "'로 포스트 신고되어 제재 당했습니다";
           this.sendMessge(reportedUuid, msg);
         });
 
@@ -258,7 +254,7 @@
         if (!confirm("정말 신고를 삭제 하시겠습니까?")) return;
         this.deletePrevent(reportedUuid, cUuid, postKey);
         // TODO : 철혁님 기획 완료되면 수정할 것
-        const msg = "당신은 '" + type + "'로 신고하셨지만 허위 신고로 판단됩니다 경고드립니다";
+        const msg = "당신은 '" + type + "'로 포스트 신고하셨지만 허위 신고로 판단됩니다 경고드립니다";
         this.sendMessge(reporterUuid, msg);
 
       },
