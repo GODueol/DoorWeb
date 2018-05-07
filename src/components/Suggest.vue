@@ -1,7 +1,7 @@
 <template>
 
-  <div class="container">
-    <h2>{{userId}}</h2>
+  <div class="container my-5">
+    <h2>제안</h2>
 
     <ul class="list-group">
       <li class="list-group-item" v-for="(suggest, index) in suggestList">

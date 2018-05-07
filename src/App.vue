@@ -1,13 +1,36 @@
 <template>
   <div id="app">
 
-    <b-nav tabs>
-      <b-nav-item v-if="menuSeen"> <router-link to="/notice">Notice</router-link> </b-nav-item>
-      <b-nav-item v-if="menuSeen"> <router-link to="/report/user">User Report</router-link> </b-nav-item>
-      <b-nav-item v-if="menuSeen"> <router-link to="/report/post">Post Report</router-link> </b-nav-item>
-      <b-nav-item v-if="menuSeen"> <router-link to="/suggest">Suggest</router-link> </b-nav-item>
-      <b-nav-item v-if="menuSeen" v-on:click="logOut"> Logout </b-nav-item>
-    </b-nav>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark" v-if="menuSeen" >
+      <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+          <router-link to="/notice" class="nav-item nav-link">Notice</router-link>
+          <router-link to="/suggest" class="nav-item nav-link">Suggest</router-link>
+
+          <div class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="reportMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Report
+            </a>
+            <div class="dropdown-menu" aria-labelledby="reportMenu">
+              <router-link to="/report/user" class="dropdown-item">User</router-link>
+              <router-link to="/report/post" class="dropdown-item">Post</router-link>
+            </div>
+          </div>
+
+          <div class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="preventMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+              Prevent
+            </a>
+            <div class="dropdown-menu" aria-labelledby="preventMenu">
+              <router-link to="/prevent/user" class="dropdown-item">User</router-link>
+              <router-link to="/prevent/post" class="dropdown-item">Post</router-link>
+            </div>
+          </div>
+
+          <div class="nav-item nav-link" @click="logOut">Logout </div>
+        </div>
+      </div>
+    </nav>
 
     <router-view/>
   </div>

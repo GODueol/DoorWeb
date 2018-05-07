@@ -1,25 +1,42 @@
 <template>
-  <div id = "users">
+  <div class="container my-5">
+
+    <h2> 포스트 신고 리스트 </h2>
+
     <!-- 신고된 유저별 -->
     <div class="list-group-item" v-for="(reportUser, index) in reportUsers">
       <div class="row">
 
         <!-- 신고된 유저 정보 -->
         <div class="col-4">
-          <div>
-            Email :
-            {{reportUser.user.email}}
-          </div>
 
-          <div v-if="reportUser.prevent">
-            제재횟수 :
-            {{reportUser.prevent.preventCount}}
-          </div>
+          <table class="table table-bordered">
+            <tbody>
+            <tr>
+              <td>Email</td>
+              <td>{{reportUser.user.email}}</td>
+            </tr>
+            <tr>
+              <td>Name</td>
+              <td>{{reportUser.user.id}}</td>
+            </tr>
+            <tr>
+              <td>Profile</td>
+              <td>{{reportUser.user.totalProfile}}</td>
+            </tr>
 
-          <div v-if="reportUser.prevent && reportUser.prevent.releaseDate">
-            제재 해제 시점 :
-            {{getDate(reportUser.prevent.releaseDate)}}
-          </div>
+            <tr v-if="reportUser.prevent">
+              <td>제재횟수</td>
+              <td>{{reportUser.prevent.preventCount}}</td>
+            </tr>
+
+            <tr v-if="reportUser.prevent && reportUser.prevent.releaseDate">
+              <td>제재 해제 시점</td>
+              <td>{{getDate(reportUser.prevent.releaseDate)}}</td>
+            </tr>
+
+            </tbody>
+          </table>
 
           <img v-if="reportUser.user.picUrls && reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl1" class="img-thumbnail"/>
         </div>
@@ -31,15 +48,24 @@
             <!-- 포스트별 -->
             <div class = "posts" >
               <div class="list-group-item" v-for="(post, postIndex) in core">
-                <div>
-                  cUuid : {{coreIndex}}
-                </div>
-                <div>
-                  postKey : {{postIndex}}
-                </div>
-                <div>
-                  isCloud : {{post.post.isCloud}}
-                </div>
+
+                <table class="table table-bordered">
+                  <tbody>
+                  <tr>
+                    <td>cUuid</td>
+                    <td>{{coreIndex}}</td>
+                  </tr>
+                  <tr>
+                    <td>postKey</td>
+                    <td>{{postIndex}}</td>
+                  </tr>
+                  <tr>
+                    <td>isCloud</td>
+                    <td>{{post.post.isCloud}}</td>
+                  </tr>
+
+                  </tbody>
+                </table>
 
                 <!-- Post 정보 -->
                 <div v-if="post.post">
@@ -115,6 +141,7 @@
 <script>
   import firebase from 'firebase'
   import message from '../helpers/message'
+  import dateUtil from '../helpers/dateUtil'
 
   let db = firebase.database();
   let reportUserRef = db.ref('reports/posts');
@@ -179,9 +206,7 @@
       })
     },
     methods: {
-      getDate(date) {
-        return new Date(date).toLocaleString();
-      },
+      getDate : dateUtil.getDate,
       setPrevent(reportedUuid, cUuid, postKey, type, reporterUuid, reportObj, postObj){
         console.log(reportedUuid, cUuid, postKey, type, reporterUuid, reportObj, postObj);
 
@@ -204,7 +229,7 @@
             if(preventObj !== null){
               preventCount = preventObj.preventCount+1;
             }
-            releaseDate = this.afterWeek(1);  // releaseDate 갱신
+            releaseDate = dateUtil.afterWeek(1);  // releaseDate 갱신
             preventRef.set({
               cUuid : cUuid,
               postKey : postKey,
@@ -241,12 +266,6 @@
           cloudRef.remove()
         }
 
-      },
-      afterWeek(weeks) {
-        const d = new Date();
-        const dayOfMonth = d.getDate();
-        d.setDate(dayOfMonth + 7*weeks);
-        return d.getTime()
       },
       deletePrevent(reportedUuid, cUuid, postKey) {
         let reportUserRef = db.ref('reports/posts/' + reportedUuid + "/" + cUuid + "/" + postKey);

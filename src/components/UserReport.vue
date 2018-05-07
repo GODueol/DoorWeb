@@ -1,5 +1,8 @@
 <template>
-  <div>
+  <div class="container my-5">
+
+    <h2> 프로필 신고 리스트 </h2>
+
     <!-- 신고된 유저별 -->
     <div class="list-group-item col-md-auto row" v-for="(reportUser, index) in reportUsers">
       <div class="row">
@@ -7,28 +10,35 @@
         <!-- 신고된 유저 정보 -->
         <div class="col-4">
 
-          <div>
-            Email : {{reportUser.user.email}}
-          </div>
+          <table class="table table-bordered">
+            <tbody>
+            <tr>
+              <td>Email</td>
+              <td>{{reportUser.user.email}}</td>
+            </tr>
+            <tr>
+              <td>Name</td>
+              <td>{{reportUser.user.id}}</td>
+            </tr>
+            <tr>
+              <td>Profile</td>
+              <td>{{reportUser.user.totalProfile}}</td>
+            </tr>
 
-          <div>
-            Name : {{reportUser.user.id}}
-          </div>
+            <tr v-if="reportUser.prevent">
+              <td>제재횟수</td>
+              <td>{{reportUser.prevent.preventCount}}</td>
+            </tr>
 
-          <div>
-            Profile : {{reportUser.user.totalProfile}}
-          </div>
+            <tr v-if="reportUser.prevent && reportUser.prevent.releaseDate">
+              <td>제재 해제 시점</td>
+              <td>{{getDate(reportUser.prevent.releaseDate)}}</td>
+            </tr>
 
-          <div v-if="reportUser.prevent">
-            제재횟수 :
-            {{reportUser.prevent.preventCount}}
-          </div>
+            </tbody>
+          </table>
 
-          <div v-if="reportUser.prevent && reportUser.prevent.releaseDate">
-            제재 해제 시점 :
-            {{getDate(reportUser.prevent.releaseDate)}}
-          </div>
-
+          <!-- 프로필 사진 -->
           <div v-if="reportUser.user.picUrls" :id="reportUser.uuid" class="carousel slide" data-ride="carousel" data-interval="false" >
             <ol class="carousel-indicators">
               <li v-if="reportUser.user.picUrls.picUrl1" data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
@@ -74,15 +84,24 @@
             <!-- 신고자별 -->
             <div>
               <div class="list-group-item" v-for="(reportedUser, reportedUserIndex) in report">
-                <div>
-                  신고자 : {{reportedUserIndex}}
-                </div>
-                <div>
-                  신고내용 : {{reportedUser.contents}}
-                </div>
-                <div>
-                  신고날 : {{getDate(reportedUser.date)}}
-                </div>
+
+                <table class="table table-bordered">
+                  <tbody>
+                  <tr>
+                    <td>신고자</td>
+                    <td>{{reportedUserIndex}}</td>
+                  </tr>
+                  <tr>
+                    <td>신고내용</td>
+                    <td>{{reportedUser.contents}}</td>
+                  </tr>
+                  <tr>
+                    <td>신고날</td>
+                    <td>{{getDate(reportedUser.date)}}</td>
+                  </tr>
+
+                  </tbody>
+                </table>
 
                 <!--버튼-->
                 <div class="dropdown">
@@ -111,6 +130,7 @@
 <script>
   import firebase from 'firebase'
   import message from '../helpers/message'
+  import dateUtil from '../helpers/dateUtil'
 
   let db = firebase.database();
   let reportUserRef = db.ref('reports/users');
@@ -139,7 +159,7 @@
         this.userId = this.user.uid
       }
 
-      var reportUsers = this.reportUsers;
+      const reportUsers = this.reportUsers;
       reportUserRef.on('value', function (snapshot) {
         reportUsers.length = 0;
         snapshot.forEach(function (childSnapshot) {
@@ -163,9 +183,7 @@
       })
     },
     methods: {
-      getDate(date) {
-        return new Date(date).toLocaleString();
-      },
+      getDate : dateUtil.getDate,
       setPrevent(reportedUuid, type, reporterUuid, reportObj, userObj){
         console.log(reportedUuid, type, reporterUuid, reportObj, userObj);
 
@@ -188,7 +206,7 @@
             if(preventObj !== null){
               preventCount = preventObj.preventCount+1;
             }
-            releaseDate = this.afterWeek(1);  // releaseDate 갱신
+            releaseDate = dateUtil.afterWeek(1);  // releaseDate 갱신
             preventRef.set({
               reportType : type,
               reporterUuid : reporterUuid,
@@ -222,12 +240,6 @@
           let userRef = db.ref('users/' + reportedUuid + "/picUrls").remove();
         }
 
-      },
-      afterWeek(weeks) {
-        const d = new Date();
-        const dayOfMonth = d.getDate();
-        d.setDate(dayOfMonth + 7*weeks);
-        return d.getTime()
       },
       deletePrevent(reportedUuid) {
         let reportUserRef = db.ref('reports/users/' + reportedUuid);

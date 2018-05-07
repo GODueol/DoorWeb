@@ -1,7 +1,9 @@
 <template>
 
-  <div class="container">
-    <h2>{{userId}}</h2>
+  <div class="container my-5">
+
+    <h2>공지</h2>
+
     <div class="input-group" style="margin-bottom:10px;">
       <input type="text" class="form-control"
              placeholder="제목을 입력하세요"
