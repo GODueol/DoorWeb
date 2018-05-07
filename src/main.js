@@ -11,7 +11,7 @@ import 'firebaseui/dist/firebaseui.css'
 
 import App from './App'
 import router from './router'
-import {config} from './helpers/firebaseConfig'
+
 
 Vue.config.productionTip = false
 Vue.use(BootstrapVue)

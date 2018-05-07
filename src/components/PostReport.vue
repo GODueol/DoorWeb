@@ -114,6 +114,7 @@
 
 <script>
   import firebase from 'firebase'
+  import message from '../helpers/message'
 
   let db = firebase.database();
   let reportUserRef = db.ref('reports/posts');
@@ -192,7 +193,8 @@
           const preventObj = snapshot.val();
 
           // 현재 재재중이면 포스트 삭제만
-          let releaseDate = preventObj.releaseDate;
+          let releaseDate = (preventObj === null? null :preventObj.releaseDate);
+
           const now = new Date().getTime();
 
           // 제재기간이 아닐때만 제재
@@ -219,9 +221,9 @@
           deletePost(cUuid, postKey);
           this.deletePrevent(reportedUuid, cUuid, postKey);
 
-          // TODO : 철혁님 기획 완료되면 수정할 것
-          const msg = "당신은 '" + type + "'로 포스트 신고되어 제재 당했습니다";
-          this.sendMessge(reportedUuid, msg);
+          const msg = "[프로필 제재를 가할 때 회원에게 보내는 메세지] : 안녕하세요 회원님. 코어 관리자입니다. \n\n 회원님의 프로필 내용이 "+type+" 항목으로 신고되었고, 이에 정당한 신고 사유로 인정되어 관리자에 의해 [프로필 삭제 및 7일간 프로필 업로드 금지] 처리됨을 알립니다. \n\n 코어는 제재된 회원에 대한 정보를 기록하고 있으며, 제재기간이 끝난 이후에도 항목을 위반한 신고가 누적될 시 계정의 이용 정지 처리될 수 있음을 알립니다."
+
+          message.sendMessge(reportedUuid, msg);
         });
 
         // 사진, 음성 삭제
@@ -253,55 +255,6 @@
       deletePreventAndSendMessage(reportedUuid, cUuid, postKey, type, reporterUuid){
         if (!confirm("정말 신고를 삭제 하시겠습니까?")) return;
         this.deletePrevent(reportedUuid, cUuid, postKey);
-        // TODO : 철혁님 기획 완료되면 수정할 것
-        const msg = "당신은 '" + type + "'로 포스트 신고하셨지만 허위 신고로 판단됩니다 경고드립니다";
-        this.sendMessge(reporterUuid, msg);
-
-      },
-      // TODO : 메세지 보내기 => 요부분은 주열이가 해야할듯..
-      sendMessge(targetUuid, msg){
-
-        const messaging = firebase.messaging()
-
-        let chatRef = db.ref('chat');
-        let newChatKey;
-        let chatRoomRef = db.ref('chatRoomList/'+targetUuid);
-        let timestamp = new Date().getTime();
-
-        chatRoomRef.child('TeamCore').once('value').then(function (snapshot) {
-          if(snapshot.val()){
-            // 이미 코어팀한테 메세지를 받은적이 있을때
-            newChatKey = snapshot.val().chatRoomid;
-
-            chatRoomRef.child('TeamCore').set({
-              lastChatTime : timestamp,
-              lastChat : msg
-            })
-          }else{
-            // 코어팀한테 메세지를 받은적이 없을때
-
-            // 키 생성
-            newChatKey = chatRef.push().key;
-            // 방생성
-            chatRoomRef.child('TeamCore').set({
-              badgeCount : 0,
-              chatRoomid : newChatKey,
-              lastChatTime : timestamp,
-              lastViewTime : 0,
-              targetUuid: "TeamCore",
-              lastChat : msg
-            })
-          }
-          chatRef.child(newChatKey).push({
-            check : 1,
-            content : msg,
-            isImage : 0,
-            nickname : "TeamCore",
-            time : timestamp,
-            writer : "TeamCore"
-          })
-        })
-
       }
     }
   }
