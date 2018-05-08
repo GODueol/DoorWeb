@@ -11,6 +11,7 @@ import 'firebaseui/dist/firebaseui.css'
 
 import App from './App'
 import router from './router'
+import routerPath from './helpers/routerPath'
 
 
 Vue.config.productionTip = false
@@ -23,7 +24,7 @@ new Vue({
   created: function () {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        this.$router.push('/notice')
+        this.$router.push(routerPath.default)
       } else {
         this.$router.push('/auth')
       }

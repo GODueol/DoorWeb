@@ -8,12 +8,13 @@
 <script>
 import firebase from 'firebase'
 import firebaseui from 'firebaseui'
+import routerPath from '../helpers/routerPath'
 
 export default {
   name: 'auth',
   mounted: function () {
     var uiConfig = {
-      signInSuccessUrl: '/notice',
+      signInSuccessUrl: routerPath.default,
       signInOptions: [
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
         firebase.auth.EmailAuthProvider.PROVIDER_ID
