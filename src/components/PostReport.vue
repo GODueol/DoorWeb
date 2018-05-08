@@ -8,7 +8,7 @@
       <div class="row">
 
         <!-- 신고된 유저 정보 -->
-        <div class="col-4">
+        <div class="col-sm-4">
 
           <table class="table table-bordered">
             <tbody>
@@ -42,7 +42,7 @@
         </div>
 
         <!-- 코어별 -->
-        <div class = "cores col-8" >
+        <div class = "cores col-sm-8" >
           <div v-for="(core, coreIndex) in reportUser.cores">
 
             <!-- 포스트별 -->
@@ -97,15 +97,24 @@
                       <!-- 신고자별 -->
                       <div>
                         <div class="list-group-item" v-for="(reportedUser, reportedUserIndex) in report">
-                          <div>
-                            신고자 : {{reportedUserIndex}}
-                          </div>
-                          <div>
-                            신고내용 : {{reportedUser.contents}}
-                          </div>
-                          <div>
-                            신고날 : {{getDate(reportedUser.date)}}
-                          </div>
+
+                          <table class="table table-bordered">
+                            <tbody>
+                            <tr>
+                              <td>신고자</td>
+                              <td><div>{{reportedUserIndex}}</div></td>
+                            </tr>
+                            <tr>
+                              <td>신고내용</td>
+                              <td>{{reportedUser.contents}}</td>
+                            </tr>
+                            <tr>
+                              <td>신고날</td>
+                              <td>{{getDate(reportedUser.date)}}</td>
+                            </tr>
+
+                            </tbody>
+                          </table>
 
                           <!--버튼-->
                           <div class="dropdown">
@@ -293,5 +302,11 @@ ul {
 li {
   display: inline-block;
   margin: 0 10px;
+}
+table{
+  table-layout: fixed;
+}
+table tr{
+  word-wrap: break-word;
 }
 </style>

@@ -8,7 +8,7 @@
       <div class="row">
 
         <!-- 유저 정보 -->
-        <div class="col">
+        <div class="col-sm">
           <h4> 유저 정보 </h4>
 
           <table class="table table-bordered">
@@ -48,7 +48,7 @@
             </tbody>
           </table>
         </div>
-        <div class="col">
+        <div class="col-sm">
           <h4> 프로필 사진 </h4>
 
           <!-- 프로필 사진 -->
@@ -162,6 +162,11 @@ li {
 }
 .carousel-item{
   overflow: auto;
-
+}
+table{
+  table-layout: fixed;
+}
+table tr{
+  word-wrap: break-word;
 }
 </style>

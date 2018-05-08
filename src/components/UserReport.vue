@@ -8,7 +8,7 @@
       <div class="row">
 
         <!-- 신고된 유저 정보 -->
-        <div class="col-4">
+        <div class="col-sm-4">
 
           <table class="table table-bordered">
             <tbody>
@@ -78,7 +78,7 @@
         </div>
 
         <!-- 신고 유형별 -->
-        <div class="col-8">
+        <div class="col-sm-8">
           <div class="list-group-item col-md-auto" v-for="(report, reportIndex) in reportUser.report">
             <!-- 신고 유형 -->
             <h4>
@@ -93,7 +93,7 @@
                   <tbody>
                   <tr>
                     <td>신고자</td>
-                    <td>{{reportedUserIndex}}</td>
+                    <td><div>{{reportedUserIndex}}</div></td>
                   </tr>
                   <tr>
                     <td>신고내용</td>
