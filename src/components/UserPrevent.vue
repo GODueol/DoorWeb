@@ -25,6 +25,15 @@
               <td>Profile</td>
               <td>{{preventUser.user.totalProfile}}</td>
             </tr>
+            <tr>
+              <td>Intro</td>
+              <td>{{preventUser.user.intro}}</td>
+            </tr>
+
+            <tr>
+              <td>uuid</td>
+              <td>{{preventUser.uuid}}</td>
+            </tr>
 
             <tr v-if="preventUser.prevent">
               <td>제재횟수</td>

@@ -24,6 +24,10 @@
               <td>Profile</td>
               <td>{{reportUser.user.totalProfile}}</td>
             </tr>
+            <tr>
+              <td>Intro</td>
+              <td>{{reportUser.user.intro}}</td>
+            </tr>
 
             <tr v-if="reportUser.prevent">
               <td>제재횟수</td>
@@ -226,6 +230,8 @@
 
         // 사진 삭제
         function deleteMedia(userObj, reportedUuid){
+
+          // file 삭제
           const storage = firebase.storage();
           if("picUrl1" in userObj.picUrls) storage.refFromURL(userObj.picUrls.picUrl1).delete();
           if("picUrl2" in userObj.picUrls) storage.refFromURL(userObj.picUrls.picUrl2).delete();
@@ -237,7 +243,11 @@
           if("thumbNail_picUrl3" in userObj.picUrls) storage.refFromURL(userObj.picUrls.thumbNail_picUrl3).delete();
           if("thumbNail_picUrl4" in userObj.picUrls) storage.refFromURL(userObj.picUrls.thumbNail_picUrl4).delete();
 
-          let userRef = db.ref('users/' + reportedUuid + "/picUrls").remove();
+          // url 삭제
+          db.ref('users/' + reportedUuid + "/picUrls").remove();
+          db.ref('users/' + reportedUuid + "/summaryUser/pictureUrl").remove();
+          db.ref('users/' + reportedUuid + "/intro").set("");
+//          db.ref('users/' + reportedUuid + "/name").set("");
         }
 
       },
