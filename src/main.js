@@ -23,7 +23,7 @@ new Vue({
   created: function () {
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {
-        this.$router.push('/success')
+        this.$router.push('/notice')
       } else {
         this.$router.push('/auth')
       }

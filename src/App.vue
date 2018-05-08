@@ -55,11 +55,7 @@ export default {
   },
   created: function () {
     firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        this.menuSeen = true
-      } else {
-        this.menuSeen = false
-      }
+      this.menuSeen = !!user;
     })
   },
   methods: {

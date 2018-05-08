@@ -1,5 +1,8 @@
 <template lang="html">
-  <div id="firebaseui-auth-container"></div>
+  <div class="starter-template">
+    <h1> Core Web </h1>
+    <div id="firebaseui-auth-container"/>
+  </div>
 </template>
 
 <script>
@@ -10,7 +13,7 @@ export default {
   name: 'auth',
   mounted: function () {
     var uiConfig = {
-      signInSuccessUrl: '/success',
+      signInSuccessUrl: '/notice',
       signInOptions: [
         firebase.auth.GoogleAuthProvider.PROVIDER_ID,
         firebase.auth.EmailAuthProvider.PROVIDER_ID
@@ -38,4 +41,9 @@ li {
 a {
   color: #42b983;
 }
+.starter-template {
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
 </style>
