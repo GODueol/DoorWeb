@@ -303,10 +303,4 @@ li {
   display: inline-block;
   margin: 0 10px;
 }
-table{
-  table-layout: fixed;
-}
-table tr{
-  word-wrap: break-word;
-}
 </style>
