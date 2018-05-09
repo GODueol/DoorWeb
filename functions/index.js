@@ -104,3 +104,28 @@ exports.sendMail = functions.database.ref('/sendMailLogs/{pushId}').onWrite((eve
 
   sendReplySuggestEmail(targetEmail, contents);
 });
+
+// 구글 계정 생성시
+// 데이터베이스 admins에 정보 삽입, 사용중은 false
+exports.putUserInfoAdmin = functions.auth.user().onCreate((event) => {
+// [END onCreateTrigger]
+  // [START eventAttributes]
+  const email = event.data.email; // The email of the user.
+  const displayName = event.data.displayName; // The display name of the user.
+  const providerId = event.data.providerData[0].providerId; // for example, "google.com" for the Google provider
+
+  console.log("event : " + JSON.stringify(event));
+  if(providerId === "google.com"){
+    return admin.database().ref('/admins/' + event.data.uid).set({
+      email : email,
+      displayName : displayName,
+      isUsed : false
+    }).then(() => {
+      // Redirect with 303 SEE OTHER to the URL of the pushed object in the Firebase console.
+      return "Success to put UserInfo Admin"
+    });
+
+  } else {
+    return "Join Normal User : " + email
+  }
+});

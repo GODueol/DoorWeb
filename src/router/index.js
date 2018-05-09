@@ -9,6 +9,7 @@ import Auth from '@/components/Auth'
 import AuthSuccess from '@/components/AuthSuccess'
 import UserPrevent from '@/components/UserPrevent'
 import PostPrevent from '@/components/PostPrevent'
+import AdminAccount from '@/components/AdminAccount'
 
 Vue.use(Router)
 
@@ -45,6 +46,10 @@ export default new Router({
       path: '/prevent/post',
       name: 'Post Prevent',
       component: PostPrevent
+    }, {
+      path: '/account/admin',
+      name: 'Add Admin',
+      component: AdminAccount
     }
   ],
   mode: 'history'

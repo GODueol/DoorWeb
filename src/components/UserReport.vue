@@ -124,8 +124,6 @@
           </div>
         </div>
 
-
-
       </div>
     </div>
   </div>
@@ -139,29 +137,16 @@
   let db = firebase.database();
   let reportUserRef = db.ref('reports/users');
 
-
   export default {
     name: 'Report',
     data() {
       return {
-        msg: 'Welcome to Your Vue.js App',
-        noticekey: String,
-        photo: String,
-        userId: String,
-        name: String,
-        email: String,
         user: {},
         reportUsers: []
       }
     },
     created: function () {
       this.user = firebase.auth().currentUser
-      if (this.user) {
-        this.name = this.user.displayName
-        this.email = this.user.email
-        this.photo = this.user.photoURL
-        this.userId = this.user.uid
-      }
 
       const reportUsers = this.reportUsers;
       reportUserRef.on('value', function (snapshot) {

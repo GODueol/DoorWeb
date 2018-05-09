@@ -16,8 +16,7 @@ export default {
     var uiConfig = {
       signInSuccessUrl: routerPath.default,
       signInOptions: [
-        firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        firebase.auth.EmailAuthProvider.PROVIDER_ID
+        firebase.auth.GoogleAuthProvider.PROVIDER_ID
       ]
     }
     var ui = new firebaseui.auth.AuthUI(firebase.auth())

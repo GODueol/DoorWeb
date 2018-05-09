@@ -22,14 +22,17 @@
 	</span>
     </div>
     <ul class="list-group">
-      <li class="list-group-item" v-for="(todo, index) in todos">
+      <li class="list-group-item" v-for="(notice, index) in notices">
+        <h4>{{notice.title}}</h4>
+        <div> {{new Date(notice.writeDate)}} </div>
+        <div> {{notice.name}} </div>
         <span>
-        <img v-if="todo.pictureUrl" v-bind:src="todo.pictureUrl"
+        <img v-if="notice.pictureUrl" v-bind:src="notice.pictureUrl"
              height="200"
              weight="200"
-             @click="detailImg(todo.pictureUrl)">
+             @click="detailImg(notice.pictureUrl)">
           </span>
-        {{todo.name}}
+        {{notice.text}}
         <div class="btn-group pull-right"
              style="font-size: 12px; line-height: 1;">
           <ul>
@@ -64,8 +67,10 @@
         userId: String,
         name: String,
         email: String,
+        title : "",
+        text : "",
         user: {},
-        todos: []
+        notices: []
       }
     },
     created: function () {
@@ -76,9 +81,16 @@
         this.photo = this.user.photoURL
         this.userId = this.user.uid
       }
-      let todos = this.todos;
-      noticeRef.on('child_added', function (data) {
+      let notices = this.notices;
 
+      noticeRef.on('value', snapshot => {
+        notices.length = 0;
+          snapshot.forEach(childSnapshot => {
+            notices.unshift(childSnapshot.val());
+          });
+      });
+
+      noticeRef.on('child_added', function (data) {
         if (data.val().pictureUrl != null) {
 
           firebase.storage().refFromURL(data.val().pictureUrl).getDownloadURL().then(function (url) {
@@ -94,20 +106,22 @@
             //var img = document.getElementById('listimage');
             //img.src = url;
 
-            todos.unshift({name: data.val().text, userId: data.val().uid, noticekey: data.key, pictureUrl: url})
+
+//            notices.unshift({name: data.val().text, userId: data.val().uid, noticekey: data.key, pictureUrl: url})
           }).catch(function (error) {
 
           })
-        } else {
-          todos.unshift({name: data.val().text, userId: data.val().uid, noticekey: data.key})
         }
+        notices.unshift(data.val());
+
+//        notices.unshift({name: data.val().text, userId: data.val().uid, noticekey: data.key})
       });
     },
     methods: {
       deleteTodo(i) {
         if (confirm("정말 공지를 삭제하시겠습니까?") === true) {
-          noticeRef.child(this.todos[i].noticekey).remove()
-          this.todos.splice(0, 1)
+          noticeRef.child(this.notices[i].noticekey).remove()
+          this.notices.splice(0, 1)
 
         }
       },
@@ -145,6 +159,7 @@
               title : title
             });
           }
+          this.title = this.text = "";
         }
       },
       detailImg(url) {

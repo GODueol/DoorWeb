@@ -7,6 +7,7 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
+          <router-link to="/account/admin" class="nav-item nav-link">Add Admin</router-link>
           <router-link to="/notice" class="nav-item nav-link">Notice</router-link>
           <router-link to="/suggest" class="nav-item nav-link">Suggest</router-link>
 
@@ -45,7 +46,7 @@ import firebase from 'firebase'
 import {config} from './helpers/firebaseConfig'
 
 firebase.initializeApp(config);
-
+let db = firebase.database();
 export default {
   name: 'App',
   data: function () {
@@ -55,7 +56,18 @@ export default {
   },
   created: function () {
     firebase.auth().onAuthStateChanged((user) => {
-      this.menuSeen = !!user;
+      if(!user) {
+        this.menuSeen = !!user;
+      } else {
+        db.ref('admins/' + user.uid + "/isUsed").once('value', snapshot => {
+          let isUsed = snapshot.val();
+          if(isUsed){
+            this.menuSeen = !!user;
+          } else {
+            this.menuSeen = false;
+          }
+        });
+      }
     })
   },
   methods: {

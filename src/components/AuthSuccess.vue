@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>Signup succeeded</h1>
+    <h1>Firbase Signup succeeded</h1>
     <button @click='logOut'>Log out</button>
     <hr>
     <img :src="photo" style="height: 120px"> <br>
@@ -8,12 +8,15 @@
     <p>{{email}}</p>
     <p>{{userId}}</p>
     <hr>
+
+    {{msg}}
   </div>
 </template>
 
 <script>
 import firebase from 'firebase'
 
+let db = firebase.database();
 export default {
   data () {
     return {
@@ -21,17 +24,32 @@ export default {
       userId: '',
       name: '',
       email: '',
-      user: {}
+      user: {},
+      msg : "관리자 인증 중입니다 기다려주세요"
     }
   },
   created: function () {
-    this.user = firebase.auth().currentUser
-    if (this.user) {
-      this.name = this.user.displayName
-      this.email = this.user.email
-      this.photo = this.user.photoURL
-      this.userId = this.user.uid
-    }
+    firebase.auth().onAuthStateChanged((user) => {
+      console.log("user",user);
+      // admin used 확인
+      db.ref('admins/' + user.uid + "/isUsed").once('value', snapshot => {
+        let isUsed = snapshot.val();
+        if(isUsed){
+          this.user = user;
+          if (this.user) {
+            this.name = this.user.displayName
+            this.email = this.user.email
+            this.photo = this.user.photoURL
+            this.userId = this.user.uid
+          }
+          this.msg = "관리자 권한 인증 완료되었습니다";
+        } else {
+          this.msg = "관리자 권한 승인 대기중입니다... 승인 이후 로그인하세요";
+        }
+      });
+
+    })
+
   },
   methods: {
     logOut () {
