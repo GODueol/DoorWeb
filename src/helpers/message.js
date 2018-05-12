@@ -11,13 +11,12 @@ export default {
     let newChatKey;
     let chatRoomRef = db.ref('chatRoomList/'+targetUuid);
     let timestamp = new Date().getTime();
-
     chatRoomRef.child('TeamCore').once('value').then(function (snapshot) {
       if(snapshot.val()){
         // 이미 코어팀한테 메세지를 받은적이 있을때
         newChatKey = snapshot.val().chatRoomid;
 
-        chatRoomRef.child('TeamCore').set({
+        chatRoomRef.child('TeamCore').update({
           lastChatTime : timestamp,
           lastChat : msg
         })
