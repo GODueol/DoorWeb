@@ -8,68 +8,38 @@ admin.initializeApp(functions.config().firebase);
 // TeamCore  메세지 푸시알림
 exports.fcmTeamCore = functions.database.ref('/chatRoomList/{userId}/TeamCore')
   .onCreate((event) => {
-    var eventSnapshot = event.data.previous.val();
-/*
-// This registration token comes from the client FCM SDKs.
-    var registrationToken = 'du4Cf4NGkmg:APA91bHKe1gRD8W0e3XvwUrLkBCrEpQlp7vtM-DpfIJB___sRI_B0EtGX1fPMl9NgjOEn4jq9jIv71cKv1N_eRjEKK_f0CwEzf_hxz9y3qFw_z6GI9djpy38Ol7yIVOr8p8k_B___C_c';
-
-// See documentation on defining a message payload.
-    var message = {
+    let message = {
       data: {
-        message : 'fadfda',
+        message : '알림',
+        room : 'TeamCore',
         type : 'chat',
-        nick : 'test'
+        nick : 'TeamCore'
       },
-      token: registrationToken
     };
 
 // Send a message to the device corresponding to the provided
 // registration token.
-    admin.messaging().send(message)
-      .then((response) => {
-        // Response is a message ID string.
-        console.log('Successfully sent message:', response);
-      })
-      .catch((error) => {
-        console.log('Error sending message:', error);
-      });*/
-
-
-    //return console.log('New Reply email sent to:', event.params.chatRoomid);
-    admin.database().ref('/log').push({fcm:'123'})
+    admin.database().ref('users').child(event.params.userId).child('token').once('value').then(function(snapshot){
+      admin.messaging().sendToDevice(snapshot.val(),message)
+    })
   });
 
 exports.fcmTeamCoreUpdate = functions.database.ref('/chatRoomList/{userId}/TeamCore')
   .onUpdate((event) => {
-    var eventSnapshot = event.data.previous.val();
-
-// This registration token comes from the client FCM SDKs.
-    var registrationToken = 'du4Cf4NGkmg:APA91bHKe1gRD8W0e3XvwUrLkBCrEpQlp7vtM-DpfIJB___sRI_B0EtGX1fPMl9NgjOEn4jq9jIv71cKv1N_eRjEKK_f0CwEzf_hxz9y3qFw_z6GI9djpy38Ol7yIVOr8p8k_B___C_c';
-
-// See documentation on defining a message payload.
-    var message = {
+    let message = {
       data: {
-        message : 'fadfda',
+        message : '알림',
+        room : 'TeamCore',
         type : 'chat',
-        nick : 'test'
+        nick : 'TeamCore'
       },
-      token: registrationToken
     };
 
 // Send a message to the device corresponding to the provided
 // registration token.
-    admin.messaging().send(message)
-      .then((response) => {
-        // Response is a message ID string.
-        console.log('Successfully sent message:', response);
-      })
-      .catch((error) => {
-        console.log('Error sending message:', error);
-      });
-
-
-    //return console.log('New Reply email sent to:', event.params.chatRoomid);
-    admin.database().ref('/log').push({fcm:'123'})
+    admin.database().ref('users').child(event.params.userId).child('token').once('value').then(function(snapshot){
+      admin.messaging().sendToDevice(snapshot.val(),message)
+    })
   });
 
 // https 트리거 테스트
