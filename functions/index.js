@@ -6,39 +6,41 @@ const nodemailer = require('nodemailer');
 admin.initializeApp(functions.config().firebase);
 
 // TeamCore  메세지 푸시알림
-exports.fcmTeamCore = functions.database.ref('/chatRoomList/{userId}/TeamCore')
+exports.fcmTeamCore = functions.database.ref('/chatRoomList/{userId}/TeamCore/lastChatTime')
   .onCreate((event) => {
-    let message = {
-      data: {
-        message : '알림',
-        room : 'TeamCore',
-        type : 'chat',
-        nick : 'TeamCore'
-      },
-    };
 
-// Send a message to the device corresponding to the provided
-// registration token.
-    admin.database().ref('users').child(event.params.userId).child('token').once('value').then(function(snapshot){
-      admin.messaging().sendToDevice(snapshot.val(),message)
+    admin.database().ref('chatRoomList').child(event.params.userId).child('TeamCore').child('chatRoomid').once('value').then(function (snapshot) {
+      let message = {
+        data: {
+          message: '알림',
+          room: snapshot.val(),
+          type: 'chat',
+          nick: 'TeamCore'
+        },
+      };
+
+      admin.database().ref('users').child(event.params.userId).child('token').once('value').then(function (snapshot) {
+        admin.messaging().sendToDevice(snapshot.val(), message)
+      })
     })
   });
 
-exports.fcmTeamCoreUpdate = functions.database.ref('/chatRoomList/{userId}/TeamCore')
+exports.fcmTeamCoreUpdate = functions.database.ref('/chatRoomList/{userId}/TeamCore/lastChatTime')
   .onUpdate((event) => {
-    let message = {
-      data: {
-        message : '알림',
-        room : 'TeamCore',
-        type : 'chat',
-        nick : 'TeamCore'
-      },
-    };
 
-// Send a message to the device corresponding to the provided
-// registration token.
-    admin.database().ref('users').child(event.params.userId).child('token').once('value').then(function(snapshot){
-      admin.messaging().sendToDevice(snapshot.val(),message)
+    admin.database().ref('chatRoomList').child(event.params.userId).child('TeamCore').child('chatRoomid').once('value').then(function (snapshot) {
+      let message = {
+        data: {
+          message: '알림',
+          room: snapshot.val(),
+          type: 'chat',
+          nick: 'TeamCore'
+        },
+      };
+
+      admin.database().ref('users').child(event.params.userId).child('token').once('value').then(function (snapshot) {
+        admin.messaging().sendToDevice(snapshot.val(), message)
+      })
     })
   });
 
@@ -59,12 +61,11 @@ exports.deleteUser = functions.database.ref('/users/{userId}')
   .onDelete(event => {
     var eventSnapshot = event.data.previous.val();
 
-    admin.database.ref('/Alarm/'+event.params.userId).remove()
-    return  admin.database.ref('/chatRoomList/'+event.params.userId).remove()
+    admin.database.ref('/Alarm/' + event.params.userId).remove()
+    return admin.database.ref('/chatRoomList/' + event.params.userId).remove()
 
     // return admin.database().ref('/log').push({original:eventSnapshot.id})
   });
-
 
 
 // 채팅방 제거시 상대방 채팅방 제거 동기화 및 체팅 로그 제거
@@ -73,16 +74,15 @@ exports.deleteChatRoom = functions.database.ref('/chatRoomList/{userId}/{targetI
     var eventSnapshot = event.data.previous.val();
 
     // 상대방 채팅룸 지우기
-    admin.database.ref('/chatRoomList/'+event.params.targetId+'/'+event.params.userId).remove()
+    admin.database.ref('/chatRoomList/' + event.params.targetId + '/' + event.params.userId).remove()
     // 상대방 채팅방 id
     //return admin.database().ref('/log').push({image:event.params.targetId})
 
     // 연관된 채팅 기록id
-    return admin.database.ref('/chat/'+eventSnapshot.chatRoomid).remove()
+    return admin.database.ref('/chat/' + eventSnapshot.chatRoomid).remove()
     // 채팅 log id
     //admin.database().ref('/log').push({image:eventSnapshot.chatRoomid})
   });
-
 
 
 // 채팅 로그가 사라졌을떄 (채팅에 묶인 이미지 제거)
@@ -96,7 +96,6 @@ exports.deleteChatMessage = functions.database.ref('/chat/{roomId}/{messageId}')
     //해당 이미지 url
     //admin.database().ref('/log').push({image:eventSnapshot.image})
   });
-
 
 
 // Admin Email
@@ -151,11 +150,11 @@ exports.putUserInfoAdmin = functions.auth.user().onCreate((event) => {
   const providerId = event.data.providerData[0].providerId; // for example, "google.com" for the Google provider
 
   console.log("event : " + JSON.stringify(event));
-  if(providerId === "google.com"){
+  if (providerId === "google.com") {
     return admin.database().ref('/admins/' + event.data.uid).set({
-      email : email,
-      displayName : displayName,
-      isUsed : false
+      email: email,
+      displayName: displayName,
+      isUsed: false
     }).then(() => {
       // Redirect with 303 SEE OTHER to the URL of the pushed object in the Firebase console.
       return "Success to put UserInfo Admin"
