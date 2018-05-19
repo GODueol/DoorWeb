@@ -9,7 +9,7 @@ admin.initializeApp(functions.config().firebase);
 exports.fcmTeamCore = functions.database.ref('/chatRoomList/{userId}/TeamCore/lastChatTime')
   .onCreate((event) => {
 
-    admin.database().ref('chatRoomList').child(event.params.userId).child('TeamCore').child('chatRoomid').once('value').then(function (snapshot) {
+    return admin.database().ref('chatRoomList').child(event.params.userId).child('TeamCore').child('chatRoomid').once('value').then(function (snapshot) {
       let message = {
         data: {
           message: '알림',
@@ -28,7 +28,7 @@ exports.fcmTeamCore = functions.database.ref('/chatRoomList/{userId}/TeamCore/la
 exports.fcmTeamCoreUpdate = functions.database.ref('/chatRoomList/{userId}/TeamCore/lastChatTime')
   .onUpdate((event) => {
 
-    admin.database().ref('chatRoomList').child(event.params.userId).child('TeamCore').child('chatRoomid').once('value').then(function (snapshot) {
+    return admin.database().ref('chatRoomList').child(event.params.userId).child('TeamCore').child('chatRoomid').once('value').then(function (snapshot) {
       let message = {
         data: {
           message: '알림',
