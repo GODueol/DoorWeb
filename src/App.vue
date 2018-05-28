@@ -7,35 +7,36 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
-          <router-link to="/account/admin" class="nav-item nav-link">Add Admin</router-link>
-          <router-link to="/notice" class="nav-item nav-link">Notice</router-link>
-          <router-link to="/suggest" class="nav-item nav-link">Suggest</router-link>
+          <router-link to="/notice" class="nav-item nav-link">공지사항</router-link>
+
+          <router-link to="/suggest" class="nav-item nav-link">의견 보내기</router-link>
 
           <div class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="reportMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Report
+              신고 관리
             </a>
             <div class="dropdown-menu" aria-labelledby="reportMenu">
-              <router-link to="/report/user" class="dropdown-item">User</router-link>
-              <router-link to="/report/post" class="dropdown-item">Post</router-link>
+              <router-link to="/report/user" class="dropdown-item">회원</router-link>
+              <router-link to="/report/post" class="dropdown-item">포스트</router-link>
             </div>
           </div>
 
           <div class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" id="preventMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-              Prevent
+              제재 중인 회원
             </a>
             <div class="dropdown-menu" aria-labelledby="preventMenu">
-              <router-link to="/prevent/user" class="dropdown-item">User</router-link>
-              <router-link to="/prevent/post" class="dropdown-item">Post</router-link>
+              <router-link to="/prevent/user" class="dropdown-item">회원</router-link>
+              <router-link to="/prevent/post" class="dropdown-item">포스트</router-link>
             </div>
           </div>
 
-          <div class="nav-item nav-link" @click="logOut">Logout </div>
+          <router-link to="/account/admin" class="nav-item nav-link">관리자 설정</router-link>
+
+          <div class="nav-item nav-link" @click="logOut"> 로그아웃 </div>
         </div>
       </div>
     </nav>
-
 
     <router-view/>
   </div>
@@ -90,5 +91,11 @@ table{
 }
 table tr{
   word-wrap: break-word;
+}
+
+nav.navbar{
+  position: sticky;
+  top: 0;
+  z-index: 1040;
 }
 </style>
