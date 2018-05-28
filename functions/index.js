@@ -2,8 +2,10 @@ const functions = require('firebase-functions');
 // The Firebase Admin SDK to access the Firebase Realtime Database.
 const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
+const gcs = require('@google-cloud/storage')();
 
 admin.initializeApp(functions.config().firebase);
+const db = admin.database();
 
 // TeamCore  메세지 푸시알림
 exports.fcmTeamCore = functions.database.ref('/chatRoomList/{userId}/TeamCore')
@@ -165,3 +167,61 @@ exports.putUserInfoAdmin = functions.auth.user().onCreate((event) => {
     return "Join Normal User : " + email
   }
 });
+
+// 포스트 삭제 Http Test
+exports.httpTestDeletePost = functions.https.onRequest((req, res) => {
+  return deletePost("J1DGC0SV74Nw7d38BkSfK6i949z2");
+});
+
+// 계정 삭제시에 포스트 제거
+function deletePost(uuid) {
+
+  const userPostRef = db.ref('/posts/' + uuid);
+
+  userPostRef.once('value', function(snapshot) {
+    snapshot.forEach(function(childSnapshot) {
+      const postKey = childSnapshot.key;
+      const postData = childSnapshot.val();
+
+      if(postData.isCloud){
+        // 관련 코어 클라우드 제거
+        // admin.database.ref('/coreCloud/' + postKey).remove();
+      }
+
+      // 관련 스토리지 파일 제거
+      // if("pictureUrl" in postData) storage.refFromURL(postData.pictureUrl).delete();
+      // if("soundUrl" in postData) storage.refFromURL(postData.soundUrl).delete();
+
+      //test
+
+      if("pictureUrl" in postData) console.log("pictureUrl : " + db.refFromURL(postData.pictureUrl));
+
+
+      // if("soundUrl" in postData) storage.refFromURL(postData.soundUrl).delete();
+
+      return "pictureUrl : " + db.refFromURL(postData.pictureUrl);
+
+    });
+
+    // 관련 데이터베이스 데이터 제거
+    // admin.database.ref('posts/' + uuid).remove();
+
+
+  });
+
+}
+
+// TODO : 프렌즈 삭제
+function deleteFriend(uuid) {
+
+}
+
+
+// TODO : 블럭 삭제
+
+// TODO : 로케이션 삭제
+
+// TODO : 계정 삭제
+
+// 삭제후 남아있을 것이라고 생각되는 부분
+// >> 좋아요, 익명글, 알람, 신고

@@ -4,23 +4,17 @@
 
     <h2>공지</h2>
 
-    <div class="input-group" style="margin-bottom:10px;">
-      <input type="text" class="form-control"
-             placeholder="제목을 입력하세요"
-             v-model="title">
-      <input type="text" class="form-control"
-             placeholder="내용을 입력하세요"
-             v-model="text"
-             v-on:keyup.enter="createTodo(title, text)">
-      <input type="file"
-             id="image"
-             accept=".jpg, .jpeg, .png"
-             multiple>
-      <span class="input-group-btn">
-		<button class="btn btn-default" type="button"
-            @click="createTodo(title, text)">추가</button>
-	</span>
+    <!-- Button trigger modal -->
+    <div class="row justify-content-end">
+      <p>
+      <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#noticeWriteModal">
+        공지 작성
+      </button>
+      </p>
     </div>
+
+    <div class="row">
+
     <ul class="list-group">
       <li class="list-group-item" v-for="(notice, index) in notices">
         <h4>{{notice.title}}</h4>
@@ -43,6 +37,54 @@
         </div>
       </li>
     </ul>
+
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="noticeWriteModal" tabindex="-1" role="dialog" aria-labelledby="noticeWriteModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="noticeWriteModalLabel">공지 작성</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <div class="container-fluid">
+
+              <div class="row">
+                <div class="form-group col">
+                  <!--<label class="form-control-label" for="formGroupExampleInput">Example label</label>-->
+                  <input type="text" class="form-control" id="formGroupExampleInput" placeholder="제목을 입력하세요" v-model="title">
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="form-group col">
+                  <!--<label for="exampleFormControlTextarea1">Example textarea</label>-->
+                  <textarea class="form-control" id="exampleFormControlTextarea1" placeholder="내용을 입력하세요" rows="10"
+                            v-model="text"></textarea>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col">
+                  <input type="file"
+                         id="image"
+                         accept=".jpg, .jpeg, .png"
+                         multiple>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">취소</button>
+            <button type="button" class="btn btn-primary" @click="createTodo(title, text)"> 공지 등록 </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
 
@@ -52,10 +94,12 @@
 <script>
   import firebase from 'firebase'
   import 'bootstrap'
+  import $ from 'jquery'
 
   let db = firebase.database();
   let noticeRef = db.ref('notice');
   let storageRef = firebase.storage().ref('notice');
+
   export default {
 
     name: 'Notice',
@@ -126,11 +170,13 @@
         }
       },
       createTodo(title, text) {
-        if(title == null){
-          alert("제목을 입력하세요")
+        if(!title){
+          alert("제목을 입력하세요");
+          return;
         }
-        if (text == null) {
-          alert("내용을 입력하세요")
+        if (!text) {
+          alert("내용을 입력하세요");
+          return;
         }
 
         if (confirm("정말 공지를 등록하시겠습니까?") === true) {
@@ -160,6 +206,8 @@
             });
           }
           this.title = this.text = "";
+
+          $('#noticeWriteModal').modal('hide');
         }
       },
       detailImg(url) {
@@ -182,6 +230,7 @@
           intervalID = setTimeout(controller, 20);
         }
       }
+
     }
   }
 </script>
