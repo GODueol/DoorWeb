@@ -1,38 +1,93 @@
 <template>
 
-  <div class="container my-5">
+  <div class="container-fluid my-5">
     <h2>제안</h2>
 
-    <ul class="list-group">
-      <li class="list-group-item" v-for="(suggest, index) in suggestList">
-        <span>
-        <img v-if="suggest.photo" v-bind:src="suggest.photo"
-             height="200"
-             weight="200"
-             @click="detailImg(suggest.photo)">
-          </span>
-        <span> ● &nbsp; 유저이메일 : {{suggest.email}}</span>
-        <span> ● &nbsp; 수신이메일 : {{suggest.recive_email}}</span>
-        <span> ● &nbsp; 브랜드 : {{suggest.brand}}</span>
-        <span> ● &nbsp; os버전 : {{suggest.os}}</span>
-        <span> ● &nbsp; 유저id : {{suggest.sendUser}}</span>
-        <span> ● &nbsp; 내용 : {{suggest.content}}</span>
+    <ul class="list-group" >
+      <li class="list-group-item mb-2" v-for="(suggest, index) in suggestList" :class="getBorder(suggest.answerContents)">
+        <div class="row">
+
+          <div class="col-sm-5">
+
+            <div class="row">
+              <img v-if="suggest.photo" v-bind:src="suggest.photo"
+                   height="200"
+                   weight="200"
+                   @click="detailImg(suggest.photo)">
+            </div>
+
+            <div class="row">
+              <label class="col-sm-3">유저이메일</label>
+              <div class="col-sm-9">{{suggest.email}}</div>
+            </div>
+
+            <div class="row">
+              <label class="col-sm-3">수신이메일</label>
+              <div class="col-sm-9">{{suggest.recive_email}}</div>
+            </div>
+
+            <div class="row">
+              <label class="col-sm-3">브랜드</label>
+              <div class="col-sm-8">{{suggest.brand}}</div>
+            </div>
+
+            <div class="row">
+              <label class="col-sm-3">os버전</label>
+              <div class="col-sm-8">{{suggest.os}}</div>
+            </div>
+
+            <div class="row">
+              <label class="col-sm-3">유저id</label>
+              <div class="col-sm-8">{{suggest.sendUser}}</div>
+            </div>
+
+            <div class="row" v-show="suggest.answerDate">
+              <label class="col-sm-3">답변 날짜</label>
+              <div class="col-sm-8">{{getDate(suggest.answerDate)}}</div>
+            </div>
+
+            <div class="row" v-show="suggest.answerContents">
+              <label class="col-sm-3">답변 내용</label>
+              <div class="col-sm-8">{{suggest.answerContents}}</div>
+            </div>
+
+          </div>
+          <div class = "col-sm-7 d-flex flex-column">
+            <div class="p-2">
+              의견 내용
+            </div>
+            <div class="border rounded p-2 flex-fill align-self-stretch" style="overflow: auto">
+              {{suggest.content}}
+            </div>
+          </div>
+
+        </div>
+
+        <div class = "row">
+          <div class = "col-sm-11 mt-3">
+            <textarea class="form-control"
+                      placeholder="답을 입력해주세요"
+                      v-model="suggest.contents"
+                      v-on:keyup.enter="createTodo(text)"
+                      rows="10"
+                      cols="50"
+            ></textarea>
+          </div>
+          <div class = "col-sm-1 d-flex align-items-end flex-column mt-3">
+            <button type="button" class="btn btn-primary mt-auto" @click="judgment(suggest.recive_email, suggest.contents, suggest.uuid)">
+              답변하기
+            </button>
+
+          </div>
+        </div>
+
+
         <div class="btn-group pull-right"
              style="font-size: 12px; line-height: 1;">
           <ul>
             <li>
               <div class="input-group" style="margin-bottom:10px;">
-                <textarea class="form-control"
-                       placeholder="내용을 입력해주세요"
-                       v-model="suggest.contents"
-                       v-on:keyup.enter="createTodo(text)"
-                          rows="10"
-                          cols="50"
-                ></textarea>
-                  <span class="input-group-btn">
-                    <button class="btn btn-default" type="button"
-                            @click="judgment(suggest.recive_email, suggest.contents)">답변하기</button>
-              	  </span>
+
               </div>
             </li>
           </ul>
@@ -47,6 +102,7 @@
 
 <script>
   import firebase from 'firebase'
+  import dateUtil from '../helpers/dateUtil'
 
   const config2 = {
     mailer: {
@@ -105,6 +161,9 @@
               sendUser: data.val().uuid,
               os: data.val().version,
               content: data.val().content,
+              answerDate : data.val().answerDate,
+              answerContents : data.val().answerContents,
+              uuid: data.key,
               photo: url
             })
           }).catch(function (error) {
@@ -117,13 +176,16 @@
             recive_email: data.val().recive_email,
             sendUser: data.val().uuid,
             os: data.val().version,
-            content: data.val().content
+            content: data.val().content,
+            answerDate : data.val().answerDate,
+            answerContents : data.val().answerContents,
+            uuid: data.key
           })
         }
       });
     },
     methods: {
-      judgment(email, contents) {
+      judgment(email, contents, uuid) {
         if (confirm("답변을 하시겠습니까??") === true) {
           // 메일 보내기
           var timestamp = new Date().getTime();
@@ -135,8 +197,16 @@
             contents : contents
           })
 
+          suggestRef.child(uuid).child('answerDate').set(timestamp)
+          suggestRef.child(uuid).child('answerContents').set(contents)
+
         }
-      }
+      },
+      getBorder(answerContents){
+        if(answerContents) return "border-success";
+        return "border-danger";
+      },
+      getDate : dateUtil.getDate
     }
   }
 </script>
