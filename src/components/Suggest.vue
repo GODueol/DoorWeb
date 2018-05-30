@@ -4,7 +4,7 @@
     <h2>제안</h2>
 
     <ul class="list-group" >
-      <li class="list-group-item mb-2" v-for="(suggest, index) in suggestList" :class="getBorder(suggest.answerContents)">
+      <li class="list-group-item mb-2 border" v-for="(suggest, index) in suggestList" :class="getBorder(suggest.answerContents)" >
         <div class="row">
 
           <div class="col-sm-5">
@@ -46,11 +46,6 @@
               <div class="col-sm-8">{{getDate(suggest.answerDate)}}</div>
             </div>
 
-            <div class="row" v-show="suggest.answerContents">
-              <label class="col-sm-3">답변 내용</label>
-              <div class="col-sm-8">{{suggest.answerContents}}</div>
-            </div>
-
           </div>
           <div class = "col-sm-7 d-flex flex-column">
             <div class="p-2">
@@ -67,14 +62,13 @@
           <div class = "col-sm-11 mt-3">
             <textarea class="form-control"
                       placeholder="답을 입력해주세요"
-                      v-model="suggest.contents"
-                      v-on:keyup.enter="createTodo(text)"
+                      v-model="suggest.answerContents"
                       rows="10"
                       cols="50"
             ></textarea>
           </div>
           <div class = "col-sm-1 d-flex align-items-end flex-column mt-3">
-            <button type="button" class="btn btn-primary mt-auto" @click="judgment(suggest.recive_email, suggest.contents, suggest.uuid)">
+            <button type="button" class="btn btn-primary mt-auto" @click="judgment(suggest.recive_email, suggest.answerContents, suggest.uuid)">
               답변하기
             </button>
 
@@ -143,6 +137,7 @@
       let suggestList = this.suggestList;
       suggestRef.on('child_added', function (data) {
 
+        let obj = {};
         if (data.val().photo != null) {
 
           firebase.storage().refFromURL(data.val().photo).getDownloadURL().then(function (url) {
@@ -154,7 +149,7 @@
             xhr.open('GET', url);
             xhr.send();
 
-            suggestList.unshift({
+            obj = {
               brand: data.val().brand,
               email: data.val().email,
               recive_email: data.val().recive_email,
@@ -165,12 +160,12 @@
               answerContents : data.val().answerContents,
               uuid: data.key,
               photo: url
-            })
+            }
           }).catch(function (error) {
 
           })
         } else {
-          suggestList.unshift({
+          obj = {
             brand: data.val().brand,
             email: data.val().email,
             recive_email: data.val().recive_email,
@@ -180,8 +175,10 @@
             answerDate : data.val().answerDate,
             answerContents : data.val().answerContents,
             uuid: data.key
-          })
+          }
         }
+        if(obj.answerDate) suggestList.push(obj);
+        else suggestList.unshift(obj);
       });
     },
     methods: {
@@ -236,4 +233,13 @@
   a {
     color: #42b983;
   }
+
+  .border-success{
+    border: 5px solid #28a745 !important;
+  }
+
+  .border-danger{
+    border: 5px solid #dc3545 !important;
+  }
+
 </style>
