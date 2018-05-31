@@ -4,8 +4,8 @@
     <h2> 프로필 제재 유저 리스트 </h2>
 
     <!-- 제재 유저별 -->
-    <div class="list-group-item col-md-auto row" v-for="(preventUser) in preventUsers">
-      <div class="row">
+    <div class="list-group-item col-md-auto row mb-2" v-for="(preventUser) in preventUsers" :key="preventUser.uuid" :class="getBorder(preventUser.prevent.releaseDate)">
+      <div class="row" v-if="preventUser.user">
 
         <!-- 유저 정보 -->
         <div class="col-sm">
@@ -96,6 +96,7 @@
 
         </div>
 
+        <button type="button" class="btn btn-primary align-self-end" v-show="!isRelease(preventUser.prevent.releaseDate)" @click="releaseUserPrevent(preventUser.uuid)"> 제재 해제 </button>
 
       </div>
     </div>
@@ -105,6 +106,7 @@
 <script>
   import firebase from 'firebase'
   import dateUtil from '../helpers/dateUtil'
+  import commonUtil from '../helpers/commonUtil'
 
   let db = firebase.database();
   let preventUserListRef = db.ref('prevents/user');
@@ -120,25 +122,33 @@
     created: function () {
       this.user = firebase.auth().currentUser
 
+      const vue = this;
       const preventUsers = this.preventUsers;
-      preventUserListRef.on('value', function (snapshot) {
+      preventUserListRef.orderByChild('releaseDate').on('value', function (snapshot) {
         preventUsers.length = 0;
         snapshot.forEach(function (childSnapshot) {
           const child = {};
           child["uuid"] = childSnapshot.key;
           child["prevent"] = childSnapshot.val();
+          preventUsers.unshift(child);
 
           // get userInfo
           let userRef = db.ref('users/' + childSnapshot.key);
           userRef.once('value', function (userSnapshot) {
-            child["user"] = userSnapshot.val();
-            preventUsers.push(child);
+            vue.$set(child, 'user', userSnapshot.val());
           });
         });
       })
     },
     methods: {
       getDate : dateUtil.getDate,
+      isRelease: commonUtil.isRelease,
+      getBorder: commonUtil.getBorder,
+      releaseUserPrevent(uuid, releaseDate) {
+        if (!confirm("유저 제재를 해제하시겠습니까??")) return;
+        // 날짜를 오늘로 갱신
+        preventUserListRef.child(uuid).child("releaseDate").set((new Date).getTime());
+      }
     }
   }
 
