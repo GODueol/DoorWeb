@@ -111,4 +111,16 @@ nav.navbar{
   border: 5px solid #ffc107 !important;
 }
 
+
+.carousel-item {
+  text-align: center;
+  background: gray;
+
+}
+.carousel-item img {
+  height: 200px;
+  width: auto;
+}
+
+
 </style>

@@ -71,17 +71,17 @@
             </ol>
             <div class="carousel-inner">
               <div class="carousel-item active" v-if="preventUser.user.picUrls.picUrl1">
-                <img class="d-block w-100" v-bind:src="preventUser.user.picUrls.picUrl1" alt="First slide">
+                <img v-bind:src="preventUser.user.picUrls.picUrl1" alt="First slide">
               </div>
               <div class="carousel-item" v-if="preventUser.user.picUrls.picUrl2">
-                <img class="d-block w-100" v-bind:src="preventUser.user.picUrls.picUrl2" alt="Second slide">
+                <img v-bind:src="preventUser.user.picUrls.picUrl2" alt="Second slide">
               </div>
               <div class="carousel-item" v-if="preventUser.user.picUrls.picUrl3">
-                <img class="d-block w-100" v-bind:src="preventUser.user.picUrls.picUrl3" alt="Third slide">
+                <img v-bind:src="preventUser.user.picUrls.picUrl3" alt="Third slide">
               </div>
 
               <div class="carousel-item" v-if="preventUser.user.picUrls.picUrl4">
-                <img class="d-block w-100" v-bind:src="preventUser.user.picUrls.picUrl4" alt="Third slide">
+                <img v-bind:src="preventUser.user.picUrls.picUrl4" alt="Third slide">
               </div>
             </div>
             <a class="carousel-control-prev" :href="'#'+preventUser.uuid" role="button" data-slide="prev">

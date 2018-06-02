@@ -8,42 +8,11 @@
       <div class="row">
 
         <!-- 신고된 유저 정보 -->
-        <div class="col-sm-4">
+        <div class="col-sm-5">
 
-          <table class="table table-bordered">
-            <tbody>
-            <tr>
-              <td>Email</td>
-              <td>{{reportUser.user.email}}</td>
-            </tr>
-            <tr>
-              <td>Name</td>
-              <td>{{reportUser.user.id}}</td>
-            </tr>
-            <tr>
-              <td>Profile</td>
-              <td>{{reportUser.user.totalProfile}}</td>
-            </tr>
-            <tr>
-              <td>Intro</td>
-              <td>{{reportUser.user.intro}}</td>
-            </tr>
-
-            <tr v-if="reportUser.prevent">
-              <td>제재횟수</td>
-              <td>{{reportUser.prevent.preventCount}}</td>
-            </tr>
-
-            <tr v-if="reportUser.prevent && reportUser.prevent.releaseDate">
-              <td>제재 해제 시점</td>
-              <td>{{getDate(reportUser.prevent.releaseDate)}}</td>
-            </tr>
-
-            </tbody>
-          </table>
 
           <!-- 프로필 사진 -->
-          <div v-if="reportUser.user.picUrls" :id="reportUser.uuid" class="carousel slide" data-ride="carousel" data-interval="false" >
+          <div v-if="reportUser.user.picUrls" :id="reportUser.uuid" class="carousel slide mb-3" data-ride="carousel" data-interval="false" >
             <ol class="carousel-indicators">
               <li v-if="reportUser.user.picUrls.picUrl1" data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
               <li v-if="reportUser.user.picUrls.picUrl2" data-target="#carouselExampleIndicators" data-slide-to="1"></li>
@@ -52,17 +21,17 @@
             </ol>
             <div class="carousel-inner">
               <div class="carousel-item active" v-if="reportUser.user.picUrls.picUrl1">
-                <img class="d-block w-100" v-bind:src="reportUser.user.picUrls.picUrl1" alt="First slide">
+                <img v-bind:src="reportUser.user.picUrls.picUrl1" alt="First slide" @click="detailImg(reportUser.user.picUrls.picUrl1)">
               </div>
               <div class="carousel-item" v-if="reportUser.user.picUrls.picUrl2">
-                <img class="d-block w-100" v-bind:src="reportUser.user.picUrls.picUrl2" alt="Second slide">
+                <img v-bind:src="reportUser.user.picUrls.picUrl2" alt="Second slide" @click="detailImg(reportUser.user.picUrls.picUrl2)">
               </div>
               <div class="carousel-item" v-if="reportUser.user.picUrls.picUrl3">
-                <img class="d-block w-100" v-bind:src="reportUser.user.picUrls.picUrl3" alt="Third slide">
+                <img v-bind:src="reportUser.user.picUrls.picUrl3" alt="Third slide" @click="detailImg(reportUser.user.picUrls.picUrl3)">
               </div>
 
               <div class="carousel-item" v-if="reportUser.user.picUrls.picUrl4">
-                <img class="d-block w-100" v-bind:src="reportUser.user.picUrls.picUrl4" alt="Third slide">
+                <img v-bind:src="reportUser.user.picUrls.picUrl4" alt="Third slide" @click="detailImg(reportUser.user.picUrls.picUr4)">
               </div>
             </div>
             <a class="carousel-control-prev" :href="'#'+reportUser.uuid" role="button" data-slide="prev">
@@ -75,10 +44,45 @@
             </a>
           </div>
 
+          <!-- 프로필 정보 -->
+          <table class="table table-bordered">
+            <tbody>
+            <tr>
+              <td>제재 여부</td>
+              <td v-if="reportUser.prevent && !isRelease(reportUser.prevent.releaseDate)"> 제제 중 ({{reportUser.prevent.preventCount}}) {{getDate(reportUser.prevent.releaseDate)}}</td>
+              <td v-else-if="reportUser.prevent"> 제제 중 아님 ({{reportUser.prevent.preventCount}}) {{getDate(reportUser.prevent.releaseDate)}}</td>
+              <td v-else> 제제 이력 없음 </td>
+            </tr>
+
+            <tr>
+              <td>이메일</td>
+              <td>{{reportUser.user.email}}</td>
+            </tr>
+            <tr>
+              <td>닉네임</td>
+              <td>{{reportUser.user.id}}</td>
+            </tr>
+            <tr>
+              <td>프로필</td>
+              <td>{{reportUser.user.totalProfile}}</td>
+            </tr>
+            <tr>
+              <td>소개</td>
+              <td>{{reportUser.user.intro}}</td>
+            </tr>
+
+
+
+
+            </tbody>
+          </table>
+
+
+
         </div>
 
         <!-- 신고 유형별 -->
-        <div class="col-sm-8">
+        <div class="col-sm-7">
           <div class="list-group-item col-md-auto" v-for="(report, reportIndex) in reportUser.report">
             <!-- 신고 유형 -->
             <h4>
@@ -133,6 +137,7 @@
   import firebase from 'firebase'
   import message from '../helpers/message'
   import dateUtil from '../helpers/dateUtil'
+  import cu from '../helpers/commonUtil'
 
   let db = firebase.database();
   let reportUserRef = db.ref('reports/users');
@@ -250,7 +255,13 @@
       deletePreventAndSendMessage(reportedUuid, type, reporterUuid){
         if (!confirm("정말 신고를 삭제 하시겠습니까?")) return;
         this.deletePrevent(reportedUuid);
-      }
+      },
+      detailImg : cu.detailImg,
+      isRelease : cu.isRelease,
+
+    },
+    computed:{
+
     }
   }
 
@@ -270,8 +281,5 @@ li {
   display: inline-block;
   margin: 0 10px;
 }
-.carousel-item{
-  overflow: auto;
 
-}
 </style>

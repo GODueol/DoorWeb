@@ -95,6 +95,7 @@
   import firebase from 'firebase'
   import 'bootstrap'
   import $ from 'jquery'
+  import cu from '../helpers/commonUtil'
 
   let db = firebase.database();
   let noticeRef = db.ref('notice');
@@ -210,27 +211,7 @@
           $('#noticeWriteModal').modal('hide');
         }
       },
-      detailImg(url) {
-        console.log("dsadsad")
-        let img1 = new Image();
-        img1.src = (url);
-        if ((img1.width != 0) && (img1.height != 0)) {
-          let W = img1.width;
-          let H = img1.height;
-          let O = "width=" + W + ",height=" + H + ",scrollbars=yes";
-          let imgWin = window.open("", "", O);
-          imgWin.document.write("<html><head><title>:*:*:*: 이미지상세보기 :*:*:*:*:*:*:</title></head>");
-          imgWin.document.write("<body topmargin=0 leftmargin=0>");
-          imgWin.document.write("<img src=" + url + " onclick='self.close()' style='cursor:pointer;' title ='클릭하시면 창이 닫힙니다.'>");
-          imgWin.document.close();
-
-        }
-        else {
-          let controller = "imgControll('" + url + "')";
-          intervalID = setTimeout(controller, 20);
-        }
-      }
-
+      detailImg : cu.detailImg
     }
   }
 </script>
