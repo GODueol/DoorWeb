@@ -89,7 +89,7 @@
 
         <button type="button" class="btn btn-primary align-self-end" v-show="!isRelease(preventUser.prevent.releaseDate)" @click="releasePostPrevent(preventUser.uuid)"> 제재 해제 </button>
 
-        <button type="button" class="btn btn-primary align-self-end" v-show="isOneYear(preventUser.prevent.releaseDate)" @click="deleteUserPrevent(preventUser.uuid)"> 삭제 </button>
+        <button type="button" class="btn btn-primary align-self-end" v-show="isRelease(preventUser.prevent.releaseDate)" @click="deletePostPrevent(preventUser.uuid)"> 삭제 </button>
 
       </div>
     </div>
@@ -145,7 +145,7 @@
       isRelease : cu.isRelease,
       getBorder : cu.getBorder,
       isOneYear: cu.isOneYear,
-      deleteUserPrevent(uuid) {
+      deletePostPrevent(uuid) {
         if (!confirm("제재 정보를 삭제하시겠습니까??")) return;
         // 제재 정보 삭제
         preventPostListRef.child(uuid).remove();
