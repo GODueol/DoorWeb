@@ -98,12 +98,17 @@ nav.navbar{
   top: 0;
   z-index: 1040;
 }
+
 .border-success{
   border: 5px solid #28a745 !important;
 }
 
 .border-danger{
   border: 5px solid #dc3545 !important;
+}
+
+.border-warning{
+  border: 5px solid #ffc107 !important;
 }
 
 </style>

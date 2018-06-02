@@ -87,7 +87,9 @@
 
         </div>
 
-        <button type="button" class="btn btn-primary align-self-end" v-show="!isRelease(preventUser.prevent.releaseDate)" @click="releaseUserPrevent(preventUser.uuid)"> 제재 해제 </button>
+        <button type="button" class="btn btn-primary align-self-end" v-show="!isRelease(preventUser.prevent.releaseDate)" @click="releasePostPrevent(preventUser.uuid)"> 제재 해제 </button>
+
+        <button type="button" class="btn btn-primary align-self-end" v-show="isOneYear(preventUser.prevent.releaseDate)" @click="deleteUserPrevent(preventUser.uuid)"> 삭제 </button>
 
       </div>
     </div>
@@ -97,7 +99,7 @@
 <script>
   import firebase from 'firebase'
   import dateUtil from '../helpers/dateUtil'
-  import commonUtil from '../helpers/commonUtil'
+  import cu from '../helpers/commonUtil'
 
   let db = firebase.database();
   let preventPostListRef = db.ref('prevents/post');
@@ -135,13 +137,19 @@
     },
     methods: {
       getDate : dateUtil.getDate,
-      releaseUserPrevent(uuid, releaseDate) {
+      releasePostPrevent(uuid, releaseDate) {
         if (!confirm("포스트 제재를 해제하시겠습니까??")) return;
         // 날짜를 오늘로 갱신
         preventPostListRef.child(uuid).child("releaseDate").set((new Date).getTime());
       },
-      isRelease: commonUtil.isRelease,
-      getBorder: commonUtil.getBorder,
+      isRelease : cu.isRelease,
+      getBorder : cu.getBorder,
+      isOneYear: cu.isOneYear,
+      deleteUserPrevent(uuid) {
+        if (!confirm("제재 정보를 삭제하시겠습니까??")) return;
+        // 제재 정보 삭제
+        preventPostListRef.child(uuid).remove();
+      }
     }
   }
 
