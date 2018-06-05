@@ -117,10 +117,12 @@ nav.navbar{
   background: gray;
 
 }
-.carousel-item img {
+.carousel-item img, .post-pic {
   height: 200px;
   width: auto;
 }
-
+.category-list{
+  overflow: auto;
+}
 
 </style>

@@ -4,145 +4,135 @@
     <h2> 포스트 신고 리스트 </h2>
 
     <!-- 신고된 유저별 -->
-    <div class="list-group-item" v-for="(reportUser, index) in reportUsers">
-      <div class="row">
+    <div v-for="(reportUser, index) in reportUsers">
+      <!-- 코어별 -->
+      <div class = "cores" >
+        <div v-for="(core, coreIndex) in reportUser.cores">
+          <!-- 포스트별 -->
+          <div class="list-group-item card d-flex flex-row align-items-stretch" v-for="(post, postIndex) in core">
+              <div class="row ">
+                <!-- 신고된 유저 정보 -->
+                <div class="col-sm-4">
 
-        <!-- 신고된 유저 정보 -->
-        <div class="col-sm-4">
-
-          <table class="table table-bordered">
-            <tbody>
-            <tr>
-              <td>Email</td>
-              <td>{{reportUser.user.email}}</td>
-            </tr>
-            <tr>
-              <td>Name</td>
-              <td>{{reportUser.user.id}}</td>
-            </tr>
-            <tr>
-              <td>Profile</td>
-              <td>{{reportUser.user.totalProfile}}</td>
-            </tr>
-
-            <tr v-if="reportUser.prevent">
-              <td>제재횟수</td>
-              <td>{{reportUser.prevent.preventCount}}</td>
-            </tr>
-
-            <tr v-if="reportUser.prevent && reportUser.prevent.releaseDate">
-              <td>제재 해제 시점</td>
-              <td>{{getDate(reportUser.prevent.releaseDate)}}</td>
-            </tr>
-
-            </tbody>
-          </table>
-
-          <img v-if="reportUser.user.picUrls && reportUser.user.picUrls.picUrl1" v-bind:src="reportUser.user.picUrls.picUrl1" class="img-thumbnail"/>
-        </div>
-
-        <!-- 코어별 -->
-        <div class = "cores col-sm-8" >
-          <div v-for="(core, coreIndex) in reportUser.cores">
-
-            <!-- 포스트별 -->
-            <div class = "posts" >
-              <div class="list-group-item" v-for="(post, postIndex) in core">
-
-                <table class="table table-bordered">
-                  <tbody>
-                  <tr>
-                    <td>cUuid</td>
-                    <td>{{coreIndex}}</td>
-                  </tr>
-                  <tr>
-                    <td>postKey</td>
-                    <td>{{postIndex}}</td>
-                  </tr>
-                  <tr>
-                    <td>isCloud</td>
-                    <td>{{post.post.isCloud}}</td>
-                  </tr>
-
-                  </tbody>
-                </table>
-
-                <!-- Post 정보 -->
-                <div v-if="post.post">
-                  <!--{{post.post}}-->
-
-                  <!-- 사진 -->
-
-                  <img v-if="post.post.pictureUrl" v-bind:src="post.post.pictureUrl" class="img-thumbnail">
-
-                  <!-- 내용 -->
-                  <h3>{{post.post.text}} </h3>
-
-                  <!-- 음성 -->
-                  <div v-if="post.post.soundUrl">
-                    <audio controls style="width: 600px;">
-                      <source v-bind:src="post.post.soundUrl">
-                    </audio>
+                  <!-- 포스트 사진 -->
+                  <div class="post-pic-div mb-3">
+                    <img v-if="post.post && post.post.pictureUrl" v-bind:src="post.post.pictureUrl" class="img-thumbnail post-pic" @click="detailImg(post.post.pictureUrl)">
                   </div>
-                </div>
 
-                <!-- 신고 유형별 -->
-                <div class = "reportTypes">
-                  <!-- 신고 유형 -->
-                  <div class="list-group-item" v-for="(report, reportIndex) in post">
-                    <div v-if="reportIndex != 'post'">
-                      <h4>
-                          {{reportIndex}}
-                      </h4>
-                      <!-- 신고자별 -->
-                      <div>
-                        <div class="list-group-item" v-for="(reportedUser, reportedUserIndex) in report">
+                  <table class="table table-bordered">
+                    <tbody>
+                    <tr>
+                      <td>제재 여부</td>
+                      <td v-if="reportUser.prevent && !isRelease(reportUser.prevent.releaseDate)"> 제제 중 ({{reportUser.prevent.preventCount}}) {{getDate(reportUser.prevent.releaseDate)}}</td>
+                      <td v-else-if="reportUser.prevent"> 제제 중 아님 ({{reportUser.prevent.preventCount}}) {{getDate(reportUser.prevent.releaseDate)}}</td>
+                      <td v-else> 제제 이력 없음 </td>
+                    </tr>
+                    <tr v-if="reportUser.user">
+                      <td>이메일</td>
+                      <td>{{reportUser.user.email}}</td>
+                    </tr>
 
-                          <table class="table table-bordered">
-                            <tbody>
-                            <tr>
-                              <td>신고자</td>
-                              <td><div>{{reportedUserIndex}}</div></td>
-                            </tr>
-                            <tr>
-                              <td>신고내용</td>
-                              <td>{{reportedUser.contents}}</td>
-                            </tr>
-                            <tr>
-                              <td>신고날</td>
-                              <td>{{getDate(reportedUser.date)}}</td>
-                            </tr>
+                    <tr>
+                      <td>코어주인</td>
+                      <td>{{coreIndex}}</td>
+                    </tr>
+                    <tr>
+                      <td>포스트키</td>
+                      <td>{{postIndex}}</td>
+                    </tr>
+                    <tr v-if="post.post">
+                      <td>클라우드 여부</td>
+                      <td>{{post.post.isCloud}}</td>
+                    </tr>
 
-                            </tbody>
-                          </table>
+                    <tr v-if="post.post">
+                      <td>녹음 내용</td>
+                      <td>{{post.post.text}}</td>
+                    </tr>
 
-                          <!--버튼-->
-                          <div class="dropdown">
-                            <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                              조치
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                              <a class="dropdown-item" @click="setPrevent(reportUser.uuid, coreIndex, postIndex, reportIndex, reportedUserIndex, reportedUser, post.post)">포스트 삭제 / 7일 업로드 중지</a>
-                              <a class="dropdown-item" @click="deletePreventAndSendMessage(reportUser.uuid, coreIndex, postIndex, reportIndex, reportedUserIndex)">신고 삭제</a>
-                              <a class="dropdown-item" href="#">계정 정지</a>
-                            </div>
-                          </div>
+                    <tr v-if="post.post">
+                      <td>포스트 내용</td>
+                      <td><audio controls style="width: 600px;" v-if="post.post.soundUrl">
+                        <source v-bind:src="post.post.soundUrl">
+                      </audio></td>
+                    </tr>
 
-                        </div>
-                      </div>
+
+                    </tbody>
+                  </table>
+
+                  <!-- Post 정보 -->
+                  <div v-if="post.post">
+
+                    <!-- 내용 -->
+                    <h3>{{post.post.text}} </h3>
+
+                    <!-- 음성 -->
+                    <div v-if="post.post.soundUrl">
+                      <audio controls style="width: 600px;">
+                        <source v-bind:src="post.post.soundUrl">
+                      </audio>
                     </div>
                   </div>
 
                 </div>
 
+                <div class="col-sm-8 category-list">
+                  <!-- 신고 유형별 -->
+                  <div class = "reportTypes ">
+                    <!-- 신고 유형 -->
+                    <div class="list-group-item" v-for="(report, reportIndex) in post">
+                      <div v-if="reportIndex != 'post'">
+                        <h4>
+                            {{reportIndex}}
+                        </h4>
+                        <!-- 신고자별 -->
+                        <div>
+                          <div class="list-group-item" v-for="(reportedUser, reportedUserIndex) in report">
 
+                            <table class="table table-bordered">
+                              <tbody>
+                              <tr>
+                                <td>신고자</td>
+                                <td><div>{{reportedUserIndex}}</div></td>
+                              </tr>
+                              <tr>
+                                <td>신고내용</td>
+                                <td>{{reportedUser.contents}}</td>
+                              </tr>
+                              <tr>
+                                <td>신고날</td>
+                                <td>{{getDate(reportedUser.date)}}</td>
+                              </tr>
+
+                              </tbody>
+                            </table>
+
+                            <!--버튼-->
+                            <div class="dropdown">
+                              <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                조치
+                              </button>
+                              <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                                <a class="dropdown-item" @click="setPrevent(reportUser.uuid, coreIndex, postIndex, reportIndex, reportedUserIndex, reportedUser, post.post)">포스트 삭제 / 7일 업로드 중지</a>
+                                <a class="dropdown-item" @click="deletePreventAndSendMessage(reportUser.uuid, coreIndex, postIndex, reportIndex, reportedUserIndex)">신고 삭제</a>
+                                <a class="dropdown-item" href="#">계정 정지</a>
+                              </div>
+                            </div>
+
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
               </div>
+
             </div>
-          </div>
         </div>
-
-
-      </div>
+    </div>
     </div>
   </div>
 </template>
@@ -151,9 +141,10 @@
   import firebase from 'firebase'
   import message from '../helpers/message'
   import dateUtil from '../helpers/dateUtil'
+  import cu from '../helpers/commonUtil'
 
   let db = firebase.database();
-  let reportUserRef = db.ref('reports/posts');
+  let reportPostRef = db.ref('reports/posts');
 
   export default {
     name: 'Report',
@@ -166,13 +157,15 @@
     created: function () {
       this.user = firebase.auth().currentUser
 
-      let reportUsers = this.reportUsers;
-      reportUserRef.on('value', function (snapshot) {
+      const reportUsers = this.reportUsers;
+      const vue = this;
+      reportPostRef.on('value', function (snapshot) {
         reportUsers.length = 0
         snapshot.forEach(function (childSnapshot) {
           const child = {};
           child["uuid"] = childSnapshot.key;
           child["cores"] = childSnapshot.val();
+          reportUsers.push(child);
 
           // get Post
           Object.keys(child["cores"]).map(function(cUuid) {
@@ -181,7 +174,8 @@
               let postRef = db.ref('posts/' + cUuid + "/" + postKey);
 
               postRef.once('value', function (postSnapshot) {
-                core[postKey]["post"] = postSnapshot.val();
+                vue.$set(child.cores[cUuid][postKey], 'post', postSnapshot.val());
+
               });
             });
           });
@@ -190,12 +184,11 @@
           let userRef = db.ref('users/' + childSnapshot.key);
           let preventUserRef = db.ref('prevents/post/' + childSnapshot.key);
           userRef.once('value', function (userSnapshot) {
-            child["user"] = userSnapshot.val();
+            vue.$set(child, 'user', userSnapshot.val());
 
             // get prevent
             preventUserRef.once('value', preventSnapshot =>{
-              child["prevent"] = preventSnapshot.val();
-              reportUsers.push(child);
+              vue.$set(child, 'prevent', preventSnapshot.val());
             });
 
           });
@@ -271,7 +264,9 @@
       deletePreventAndSendMessage(reportedUuid, cUuid, postKey, type, reporterUuid){
         if (!confirm("정말 신고를 삭제 하시겠습니까?")) return;
         this.deletePrevent(reportedUuid, cUuid, postKey);
-      }
+      },
+      detailImg : cu.detailImg,
+      isRelease : cu.isRelease,
     }
   }
 
@@ -290,5 +285,11 @@ ul {
 li {
   display: inline-block;
   margin: 0 10px;
+}
+.card{
+  height: 700px;
+}
+.post-pic-div{
+  text-align: center;
 }
 </style>

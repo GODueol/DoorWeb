@@ -4,8 +4,7 @@
     <h2> 프로필 신고 리스트 </h2>
 
     <!-- 신고된 유저별 -->
-    <div class="list-group-item col-md-auto row" v-for="(reportUser, index) in reportUsers">
-      <div class="row">
+    <div class="list-group-item col-md-auto card row d-flex flex-row align-items-stretch" v-for="(reportUser, index) in reportUsers">
 
         <!-- 신고된 유저 정보 -->
         <div class="col-sm-5">
@@ -82,7 +81,7 @@
         </div>
 
         <!-- 신고 유형별 -->
-        <div class="col-sm-7">
+        <div class="col-sm-7 category-list">
           <div class="list-group-item col-md-auto" v-for="(report, reportIndex) in reportUser.report">
             <!-- 신고 유형 -->
             <h4>
@@ -128,7 +127,6 @@
           </div>
         </div>
 
-      </div>
     </div>
   </div>
 </template>
@@ -153,6 +151,7 @@
     created: function () {
       this.user = firebase.auth().currentUser
 
+      const vue = this;
       const reportUsers = this.reportUsers;
       reportUserRef.on('value', function (snapshot) {
         reportUsers.length = 0;
@@ -160,17 +159,17 @@
           const child = {};
           child["uuid"] = childSnapshot.key;
           child["report"] = childSnapshot.val();
+          reportUsers.push(child);
 
           // get profile
           let userRef = db.ref('users/' + childSnapshot.key);
           let preventUserRef = db.ref('prevents/user/' + childSnapshot.key);
           userRef.once('value', function (userSnapshot) {
-            child["user"] = userSnapshot.val();
+            vue.$set(child, 'user', userSnapshot.val());
 
             // get prevent
             preventUserRef.once('value', preventSnapshot =>{
-              child["prevent"] = preventSnapshot.val();
-              reportUsers.push(child);
+              vue.$set(child, 'prevent', preventSnapshot.val());
             });
           });
         });
@@ -270,16 +269,22 @@
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
+  h1, h2 {
+    font-weight: normal;
+  }
+  ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  li {
+    display: inline-block;
+    margin: 0 10px;
+  }
+
+  .card{
+    height: 550px;
+  }
+
+
 
 </style>
