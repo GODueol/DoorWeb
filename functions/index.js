@@ -245,16 +245,15 @@ exports.writePost = functions.database.ref('/posts/{cUuid}/{postKey}')
 
 // 삭제 시, 포스트 키에 해당하는 신고를 삭제
 exports.deletePost = functions.database.ref('/posts/{cUuid}/{postKey}')
-  .onDelete((change, context) => {
-    const cUuid = context.params.cUuid;
-    const postKey = context.params.postKey;
+  .onDelete((event) => {
+    const cUuid = event.params.cUuid;
+    const postKey = event.params.postKey;
 
-    const preData = change.before.val();
+    const preData = event.data.previous.val();
     const wUuid = preData.uuid;
     console.log('preData', preData);
-    console.log('curData', change.after.val());
 
-    const ref = admin.database().ref('reports/posts').child(cUuid).child(wUuid).child(postKey);
+    const ref = admin.database().ref('reports/posts').child(wUuid).child(cUuid).child(postKey);
     console.log("repostsRef", ref.toString());
 
     return ref.remove();
