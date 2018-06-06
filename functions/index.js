@@ -3,6 +3,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
 const gcs = require('@google-cloud/storage')();
+const _ = require('lodash');
 
 admin.initializeApp(functions.config().firebase);
 const db = admin.database();
@@ -139,7 +140,7 @@ exports.sendMail = functions.database.ref('/sendMailLogs/{pushId}').onWrite((eve
   const targetEmail = eventSnapshot.child('targetEmail').val();
   const contents = eventSnapshot.child('contents').val();
 
-  sendReplySuggestEmail(targetEmail, contents);
+  return sendReplySuggestEmail(targetEmail, contents);
 });
 
 // 구글 계정 생성시
@@ -177,7 +178,7 @@ function deletePost(uuid) {
 
   const userPostRef = db.ref('/posts/' + uuid);
 
-  userPostRef.once('value', function(snapshot) {
+  return userPostRef.once('value', function(snapshot) {
     snapshot.forEach(function(childSnapshot) {
       const postKey = childSnapshot.key;
       const postData = childSnapshot.val();
@@ -224,3 +225,61 @@ function deleteFriend(uuid) {
 
 // 삭제후 남아있을 것이라고 생각되는 부분
 // >> 좋아요, 익명글, 알람, 신고
+
+
+// 포스트 삭제시 PostCount 동기화
+exports.writePost = functions.database.ref('/posts/{cUuid}/{postKey}')
+  .onWrite(event => {
+    const cUuid = event.params.cUuid;
+    return admin.database().ref('posts').child(cUuid).once('value').then(snapshot => {
+      console.log(cUuid, snapshot.numChildren());
+
+      const updates = {};
+      updates['/corePostCount'] = snapshot.numChildren();
+      updates['/summaryUser/corePostCount'] = snapshot.numChildren();
+
+      return admin.database().ref('users').child(cUuid).update(updates);
+
+    });
+  });
+
+// 삭제 시, 포스트 키에 해당하는 신고를 삭제
+exports.deletePost = functions.database.ref('/posts/{cUuid}/{postKey}')
+  .onDelete((change, context) => {
+    const cUuid = context.params.cUuid;
+    const postKey = context.params.postKey;
+
+    const preData = change.before.val();
+    const wUuid = preData.uuid;
+    console.log('preData', preData);
+    console.log('curData', change.after.val());
+
+    const ref = admin.database().ref('reports/posts').child(cUuid).child(wUuid).child(postKey);
+    console.log("repostsRef", ref.toString());
+
+    return ref.remove();
+
+
+    // const ref = admin.database().ref('reports/posts').child(cUuid);
+    // return ref.once('value').then(snapshot => {
+    //   const data = snapshot.val();  // [{wUuid : {postKey:..., ...  }}, {}]
+    //
+    //   // find wUuid
+    //   const wUuid = _
+    //     .chain(Object.keys(data))
+    //     .filter(o => _.has(data[o], postKey))
+    //     .head().value();
+    //
+    //   const ref = admin.database().ref('reports/posts').child(cUuid).child(wUuid).child(postKey);
+    //   console.log("repostsRef", ref.toString());
+    //
+    //   return ref.remove();
+    // });
+    //
+  });
+
+
+
+
+
+

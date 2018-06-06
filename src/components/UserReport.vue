@@ -4,10 +4,10 @@
     <h2> 프로필 신고 리스트 </h2>
 
     <!-- 신고된 유저별 -->
-    <div class="list-group-item col-md-auto card row d-flex flex-row align-items-stretch" v-for="(reportUser, index) in reportUsers">
+    <div class="list-group-item col-md-auto card row d-flex flex-row align-items-stretch" v-for="(reportUser, index) in reportUsers" >
 
         <!-- 신고된 유저 정보 -->
-        <div class="col-sm-5">
+        <div class="col-sm-5" v-if="reportUser.user">
 
 
           <!-- 프로필 사진 -->
@@ -154,7 +154,7 @@
       const vue = this;
       const reportUsers = this.reportUsers;
       reportUserRef.on('value', function (snapshot) {
-        reportUsers.length = 0;
+        reportUsers.splice(0);
         snapshot.forEach(function (childSnapshot) {
           const child = {};
           child["uuid"] = childSnapshot.key;

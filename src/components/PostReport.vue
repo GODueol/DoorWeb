@@ -4,7 +4,7 @@
     <h2> 포스트 신고 리스트 </h2>
 
     <!-- 신고된 유저별 -->
-    <div v-for="(reportUser, index) in reportUsers">
+    <div v-for="(reportUser, index) in reportUsers" :key=reportUser.uuid>
       <!-- 코어별 -->
       <div class = "cores" >
         <div v-for="(core, coreIndex) in reportUser.cores">
@@ -44,35 +44,18 @@
                       <td>클라우드 여부</td>
                       <td>{{post.post.isCloud}}</td>
                     </tr>
-
-                    <tr v-if="post.post">
-                      <td>녹음 내용</td>
-                      <td>{{post.post.text}}</td>
-                    </tr>
-
-                    <tr v-if="post.post">
-                      <td>포스트 내용</td>
-                      <td><audio controls style="width: 600px;" v-if="post.post.soundUrl">
-                        <source v-bind:src="post.post.soundUrl">
-                      </audio></td>
-                    </tr>
-
-
                     </tbody>
                   </table>
 
-                  <!-- Post 정보 -->
-                  <div v-if="post.post">
-
-                    <!-- 내용 -->
-                    <h3>{{post.post.text}} </h3>
-
-                    <!-- 음성 -->
-                    <div v-if="post.post.soundUrl">
-                      <audio controls style="width: 600px;">
-                        <source v-bind:src="post.post.soundUrl">
-                      </audio>
-                    </div>
+                  <div v-if="post.post && post.post.soundUrl" class="mt-3">
+                    <h6>녹음 내용</h6>
+                    <div><audio controls v-if="post.post.soundUrl">
+                      <source v-bind:src="post.post.soundUrl">
+                    </audio></div>
+                  </div>
+                  <div v-if="post.post" class="mt-3">
+                    <h6>포스트 내용</h6>
+                    <div class = "border rounded p-2 flex-fill align-self-stretch">{{post.post.text}}</div>
                   </div>
 
                 </div>
@@ -142,6 +125,7 @@
   import message from '../helpers/message'
   import dateUtil from '../helpers/dateUtil'
   import cu from '../helpers/commonUtil'
+  const _ = require('lodash');
 
   let db = firebase.database();
   let reportPostRef = db.ref('reports/posts');
@@ -157,10 +141,13 @@
     created: function () {
       this.user = firebase.auth().currentUser
 
-      const reportUsers = this.reportUsers;
+      let reportUsers = this.reportUsers;
       const vue = this;
       reportPostRef.on('value', function (snapshot) {
-        reportUsers.length = 0
+        console.log("start!! created");
+//        reportUsers.length = 0;
+        reportUsers.splice(0);
+
         snapshot.forEach(function (childSnapshot) {
           const child = {};
           child["uuid"] = childSnapshot.key;
@@ -169,11 +156,18 @@
 
           // get Post
           Object.keys(child["cores"]).map(function(cUuid) {
+//            child.cores[cUuid] = {};
+
             const core = child["cores"][cUuid];
+
             Object.keys(core).map(function(postKey) {
               let postRef = db.ref('posts/' + cUuid + "/" + postKey);
 
               postRef.once('value', function (postSnapshot) {
+                console.log('cUuid', cUuid);
+                console.log('postRef', postSnapshot.key,postSnapshot.val());
+                console.log('child', child);
+
                 vue.$set(child.cores[cUuid][postKey], 'post', postSnapshot.val());
 
               });

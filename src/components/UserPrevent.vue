@@ -126,7 +126,7 @@
       const vue = this;
       const preventUsers = this.preventUsers;
       preventUserListRef.orderByChild('releaseDate').on('value', function (snapshot) {
-        preventUsers.length = 0;
+        preventUsers.splice(0);
         snapshot.forEach(function (childSnapshot) {
           const child = {};
           child["uuid"] = childSnapshot.key;

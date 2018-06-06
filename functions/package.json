@@ -13,6 +13,7 @@
     "@google-cloud/storage": "^1.6.0",
     "firebase-admin": "~5.8.1",
     "firebase-functions": "^0.8.2",
+    "lodash": "^4.17.10",
     "nodemailer": "^4.6.4"
   },
   "devDependencies": {
