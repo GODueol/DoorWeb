@@ -43,6 +43,10 @@ export default {
             this.userId = this.user.uid
           }
           this.msg = "관리자 권한 인증 완료되었습니다";
+
+          // 인증 성공시 공지사항으로 이동
+          this.$router.replace('/notice')
+
         } else {
           this.msg = "관리자 권한 승인 대기중입니다... 승인 이후 로그인하세요";
         }
