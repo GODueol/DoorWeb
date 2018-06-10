@@ -4,9 +4,9 @@ const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
 const gcs = require('@google-cloud/storage')();
 const _ = require('lodash');
+const bucketName = 'core-865fc.appspot.com';
 
 admin.initializeApp(functions.config().firebase);
-const db = admin.database();
 
 // TeamCore  메세지 푸시알림
 exports.fcmTeamCore = functions.database.ref('/chatRoomList/{userId}/TeamCore/lastChatTime')
@@ -62,10 +62,8 @@ exports.addMessage = functions.https.onRequest((req, res) => {
 // 유저가 제거되었을때 (채팅방 제거, 알림제거)
 exports.deleteUser = functions.database.ref('/users/{userId}')
   .onDelete(event => {
-    var eventSnapshot = event.data.previous.val();
-
-    admin.database.ref('/Alarm/' + event.params.userId).remove()
-    return admin.database.ref('/chatRoomList/' + event.params.userId).remove()
+    admin.database().ref('/Alarm/' + event.params.userId).remove();
+    return admin.database().ref('/chatRoomList/' + event.params.userId).remove()
 
     // return admin.database().ref('/log').push({original:eventSnapshot.id})
   });
@@ -74,15 +72,15 @@ exports.deleteUser = functions.database.ref('/users/{userId}')
 // 채팅방 제거시 상대방 채팅방 제거 동기화 및 체팅 로그 제거
 exports.deleteChatRoom = functions.database.ref('/chatRoomList/{userId}/{targetId}')
   .onDelete((event) => {
-    var eventSnapshot = event.data.previous.val();
+    const eventSnapshot = event.data.previous.val();
 
     // 상대방 채팅룸 지우기
-    admin.database.ref('/chatRoomList/' + event.params.targetId + '/' + event.params.userId).remove()
+    admin.database().ref('/chatRoomList/' + event.params.targetId + '/' + event.params.userId).remove();
     // 상대방 채팅방 id
     //return admin.database().ref('/log').push({image:event.params.targetId})
 
     // 연관된 채팅 기록id
-    return admin.database.ref('/chat/' + eventSnapshot.chatRoomid).remove()
+    return admin.database().ref('/chat/' + eventSnapshot.chatRoomid).remove()
     // 채팅 log id
     //admin.database().ref('/log').push({image:eventSnapshot.chatRoomid})
   });
@@ -91,13 +89,12 @@ exports.deleteChatRoom = functions.database.ref('/chatRoomList/{userId}/{targetI
 // 채팅 로그가 사라졌을떄 (채팅에 묶인 이미지 제거)
 exports.deleteChatMessage = functions.database.ref('/chat/{roomId}/{messageId}')
   .onDelete((event) => {
-    // 실패ㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐ
-    var eventSnapshot = event.data.previous.val()
-    if (eventSnapshot.isImage == 1) {
-      const gcs = require('@google-cloud/storage')()
-      const bucket = gcs.bucket('core-865fc.appspot.com')
-      const filePath = 'chat/image/' + event.params.roomId + '/'
-      const fileName = eventSnapshot.content
+    const eventSnapshot = event.data.previous.val();
+    if (eventSnapshot.isImage === 1) {
+      const gcs = require('@google-cloud/storage')();
+      const bucket = gcs.bucket('core-865fc.appspot.com');
+      const filePath = 'chat/image/' + event.params.roomId + '/';
+      const fileName = eventSnapshot.content;
       console.log(filePath);
       console.log(fileName);
       return bucket.file(filePath + fileName).delete()
@@ -173,64 +170,109 @@ exports.putUserInfoAdmin = functions.auth.user().onCreate((event) => {
   }
 });
 
-// 포스트 삭제 Http Test
-exports.httpTestDeletePost = functions.https.onRequest((req, res) => {
-  return deletePost("J1DGC0SV74Nw7d38BkSfK6i949z2");
-});
-
 // 계정 삭제시에 포스트 제거
 function deletePost(uuid) {
 
-  const userPostRef = db.ref('/posts/' + uuid);
+  const promises = [];
 
-  return userPostRef.once('value', function (snapshot) {
-    snapshot.forEach(function (childSnapshot) {
+  const userPostRef = admin.database().ref('/posts/' + uuid);
+
+  return userPostRef.once('value', function(snapshot) {
+    snapshot.forEach(function(childSnapshot) {
       const postKey = childSnapshot.key;
       const postData = childSnapshot.val();
 
-      if (postData.isCloud) {
+      console.log(postKey, postData);
+
+      if(postData.isCloud){
         // 관련 코어 클라우드 제거
-        // admin.database.ref('/coreCloud/' + postKey).remove();
+        promises.push(admin.database().ref('/coreCloud/' + postKey).remove());
       }
 
       // 관련 스토리지 파일 제거
-      // if("pictureUrl" in postData) storage.refFromURL(postData.pictureUrl).delete();
-      // if("soundUrl" in postData) storage.refFromURL(postData.soundUrl).delete();
-
-      //test
-
-      if ("pictureUrl" in postData) console.log("pictureUrl : " + db.refFromURL(postData.pictureUrl));
-
-
-      // if("soundUrl" in postData) storage.refFromURL(postData.soundUrl).delete();
-
-      return "pictureUrl : " + db.refFromURL(postData.pictureUrl);
-
+      // gs://core-865fc.appspot.com/posts/k1WbaTLYQiR1ejg5NuPiE88zZkC3/-LEYfsf88PcZZqVlJ1Fd/picture
+      // posts/{cUuid}/{postKey}/picture
+      const bucket = gcs.bucket(bucketName); // 경로
+      if('pictureUrl' in postData) promises.push(bucket.file('posts/' + uuid + '/' + postKey + '/picture').delete());
+      if('soundUrl'   in postData) promises.push(bucket.file('posts/' + uuid + '/' + postKey + '/sound').delete());
     });
 
     // 관련 데이터베이스 데이터 제거
-    // admin.database.ref('posts/' + uuid).remove();
+    promises.push(userPostRef.remove());
+    return Promise.all(promises);
+  });
+}
 
+// 관련된 유저들 삭제, promise 반환
+function deleteRelatedUsers(userInfo, mUuid, fieldName, rFieldName) {
+  if(!(fieldName in userInfo)) return null;
+  console.log('userInfo[fieldName]', userInfo[fieldName]);
+  return admin.database().ref('users').update(Object.keys(userInfo[fieldName])
+    .reduce((map, uuid) => {
+      map[uuid + '/' + rFieldName + '/' + mUuid] = null;
+      return map;
+    }, {}));
+}
+
+// 로케이션 삭제
+function deleteLocation(mUuid){
+  return admin.database().ref('location/users').child(mUuid).remove();
+}
+
+// 계정 삭제
+function deleteAboutMyAccount(mUuid){
+
+  const promises = [];
+
+  const mUserRef = admin.database().ref('/users/').child(mUuid);
+  return mUserRef.once('value', function(snapshot) {
+    const userInfo = snapshot.val();
+
+    // gs://core-865fc.appspot.com/profile/pic/80RZJGZ6cmaHzAubYYJOlZGFd8Z2/profilePic1.jpg
+    // profile/pic/{mUuid}/profilePic1.jpg
+    // 사진 삭제 // 썸네일 사진 삭제
+    if('picUrls' in userInfo) {
+      const bucket = gcs.bucket(bucketName); // 경로
+      ['1','2','3','4'].forEach(index => {
+        if(('picUrl' + index) in userInfo.picUrls) promises.push(bucket.file('profile/pic/' + mUuid + '/profilePic'+index+'.jpg').delete());
+        if(('thumbNail_picUrl' + index) in userInfo.picUrls) promises.push(bucket.file('profile/pic/' + mUuid + '/profilePic'+index+'_thumbNail.jpg').delete());
+      })
+    }
+
+    // Block
+    promises.push(deleteRelatedUsers(userInfo, mUuid, 'blockUsers', 'blockMeUsers'));
+    promises.push(deleteRelatedUsers(userInfo, mUuid, 'blockMeUsers', 'blockUsers'));
+
+    // Follow
+    promises.push(deleteRelatedUsers(userInfo, mUuid, 'followingUsers', 'followerUsers'));
+    promises.push(deleteRelatedUsers(userInfo, mUuid, 'followerUsers', 'followingUsers'));
+    promises.push(deleteRelatedUsers(userInfo, mUuid, 'friendUsers', 'friendUsers'));
+
+    // location
+    promises.push(deleteLocation(mUuid));
+
+    // 포스트 관련 삭제
+    promises.push(deletePost(mUuid));
+
+    // 유저 데이터 삭제
+    promises.push(mUserRef.remove());
+
+    console.log('promises',promises);
+    console.log('_.compact(promises)', _.compact(promises));
+    return Promise.all(_.compact(promises));
 
   });
-
 }
 
-// TODO : 프렌즈 삭제
-function deleteFriend(uuid) {
-
-}
-
-
-// TODO : 블럭 삭제
-
-// TODO : 로케이션 삭제
-
-// TODO : 계정 삭제
+// Auth 삭제시 데이터 전부 삭제
+exports.deleteAboutMyAccount = functions.auth.user().onDelete(event => {
+  const uid = event.data.uid;
+  console.log('delete uid',uid);
+  return deleteAboutMyAccount(uid)
+});
 
 // 삭제후 남아있을 것이라고 생각되는 부분
 // >> 좋아요, 익명글, 알람, 신고
-
 
 // 포스트 삭제시 PostCount 동기화
 exports.writePost = functions.database.ref('/posts/{cUuid}/{postKey}')
@@ -243,8 +285,11 @@ exports.writePost = functions.database.ref('/posts/{cUuid}/{postKey}')
       updates['/corePostCount'] = snapshot.numChildren();
       updates['/summaryUser/corePostCount'] = snapshot.numChildren();
 
-      return admin.database().ref('users').child(cUuid).update(updates);
-
+      return admin.database().ref('users').child(cUuid).once('value', function(snapshot) {
+        if(snapshot.val() !== null) {
+          admin.database().ref('users').child(cUuid).update(updates);
+        }
+      });
     });
   });
 
@@ -263,27 +308,4 @@ exports.deletePost = functions.database.ref('/posts/{cUuid}/{postKey}')
 
     return ref.remove();
 
-
-    // const ref = admin.database().ref('reports/posts').child(cUuid);
-    // return ref.once('value').then(snapshot => {
-    //   const data = snapshot.val();  // [{wUuid : {postKey:..., ...  }}, {}]
-    //
-    //   // find wUuid
-    //   const wUuid = _
-    //     .chain(Object.keys(data))
-    //     .filter(o => _.has(data[o], postKey))
-    //     .head().value();
-    //
-    //   const ref = admin.database().ref('reports/posts').child(cUuid).child(wUuid).child(postKey);
-    //   console.log("repostsRef", ref.toString());
-    //
-    //   return ref.remove();
-    // });
-    //
   });
-
-
-
-
-
-
