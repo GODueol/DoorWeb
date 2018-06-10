@@ -91,13 +91,18 @@ exports.deleteChatRoom = functions.database.ref('/chatRoomList/{userId}/{targetI
 // 채팅 로그가 사라졌을떄 (채팅에 묶인 이미지 제거)
 exports.deleteChatMessage = functions.database.ref('/chat/{roomId}/{messageId}')
   .onDelete((event) => {
-    var eventSnapshot = event.data.previous.val();
-
     // 실패ㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐㅐ
-    const bucket = admin.storage.bucket('core-865fc.appspot.com')
-    return bucket.file(eventSnapshot.image).delete()
-    //해당 이미지 url
-    //admin.database().ref('/log').push({image:eventSnapshot.image})
+    var eventSnapshot = event.data.previous.val()
+    if (eventSnapshot.isImage == 1) {
+      const gcs = require('@google-cloud/storage')()
+      const bucket = gcs.bucket('core-865fc.appspot.com')
+      const filePath = 'chat/image/' + event.params.roomId + '/'
+      const fileName = eventSnapshot.content
+      console.log(filePath);
+      console.log(fileName);
+      return bucket.file(filePath + fileName).delete()
+    }
+
   });
 
 
@@ -178,12 +183,12 @@ function deletePost(uuid) {
 
   const userPostRef = db.ref('/posts/' + uuid);
 
-  return userPostRef.once('value', function(snapshot) {
-    snapshot.forEach(function(childSnapshot) {
+  return userPostRef.once('value', function (snapshot) {
+    snapshot.forEach(function (childSnapshot) {
       const postKey = childSnapshot.key;
       const postData = childSnapshot.val();
 
-      if(postData.isCloud){
+      if (postData.isCloud) {
         // 관련 코어 클라우드 제거
         // admin.database.ref('/coreCloud/' + postKey).remove();
       }
@@ -194,7 +199,7 @@ function deletePost(uuid) {
 
       //test
 
-      if("pictureUrl" in postData) console.log("pictureUrl : " + db.refFromURL(postData.pictureUrl));
+      if ("pictureUrl" in postData) console.log("pictureUrl : " + db.refFromURL(postData.pictureUrl));
 
 
       // if("soundUrl" in postData) storage.refFromURL(postData.soundUrl).delete();
