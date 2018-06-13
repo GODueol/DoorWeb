@@ -99,7 +99,7 @@
                               <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                                 <a class="dropdown-item" @click="setPrevent(reportUser.uuid, coreIndex, postIndex, reportIndex, reportedUserIndex, reportedUser, post.post)">포스트 삭제 / 7일 업로드 중지</a>
                                 <a class="dropdown-item" @click="deletePreventAndSendMessage(reportUser.uuid, coreIndex, postIndex, reportIndex, reportedUserIndex)">신고 삭제</a>
-                                <a class="dropdown-item" href="#">계정 정지</a>
+                                <a class="dropdown-item" @click="deleteAccount(reportUser.uuid)" href="#">계정 삭제</a>
                               </div>
                             </div>
 
@@ -261,6 +261,7 @@
       },
       detailImg : cu.detailImg,
       isRelease : cu.isRelease,
+      deleteAccount : cu.deleteAccount
     }
   }
 

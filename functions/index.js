@@ -309,3 +309,13 @@ exports.deletePost = functions.database.ref('/posts/{cUuid}/{postKey}')
     return ref.remove();
 
   });
+
+exports.deleteAccountByWeb = functions.database.ref('/reports/deleteAccount/{uuid}')
+  .onCreate(event => {
+    const uuid = event.params.uuid;
+    return admin.auth().deleteUser(uuid).then(() => {
+      return admin.database().ref('reports/deleteAccount').child(uuid).remove();
+    });
+  });
+
+

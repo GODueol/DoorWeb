@@ -1,6 +1,8 @@
 /**
  * Created by gimbyeongjin on 2018. 5. 31..
  */
+import firebase from 'firebase'
+let db = firebase.database();
 export default {
   OneYear : 60*60*24*365,
   isRelease(date) {
@@ -15,10 +17,10 @@ export default {
     return (new Date).getTime() - date >= this.OneYear; // 1년
   },
   detailImg(url) {
-    console.log("dsadsad")
+    console.log("dsadsad");
     let img1 = new Image();
     img1.src = (url);
-    if ((img1.width != 0) && (img1.height != 0)) {
+    if ((img1.width !== 0) && (img1.height !== 0)) {
       let W = img1.width;
       let H = img1.height;
       let O = "width=" + W + ",height=" + H + ",scrollbars=yes";
@@ -33,5 +35,13 @@ export default {
       let controller = "imgControll('" + url + "')";
       intervalID = setTimeout(controller, 20);
     }
+  },
+  deleteAccount(uuid) {
+    if (!confirm("정말 계정을 삭제하시겠습니까?")) return;
+    db.ref('reports/deleteAccount/' + uuid).set(true).then(() => {
+      alert("계정이 삭제되었습니다.");
+    }).catch(e => {
+      alert("계정 삭제 실패하였습니다.");
+    });
   }
 }
