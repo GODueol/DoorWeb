@@ -97,61 +97,61 @@
 </template>
 
 <script>
-  import firebase from 'firebase'
-  import dateUtil from '../helpers/dateUtil'
-  import cu from '../helpers/commonUtil'
+import firebase from 'firebase'
+import dateUtil from '../helpers/dateUtil'
+import cu from '../helpers/commonUtil'
 
-  let db = firebase.database();
-  let preventPostListRef = db.ref('prevents/post');
+let db = firebase.database();
+let preventPostListRef = db.ref('prevents/post');
 
-  export default {
-    name: 'Report',
-    data() {
-      return {
-        user: {},
-        preventUsers: []
-      }
-    },
-    created: function () {
-      this.user = firebase.auth().currentUser
+export default {
+  name: 'Report',
+  data() {
+    return {
+      user: {},
+      preventUsers: []
+    }
+  },
+  created: function () {
+    this.user = firebase.auth().currentUser
 
-      const preventUsers = this.preventUsers;
-      const vue = this;
-      preventPostListRef.orderByChild('releaseDate').on('value', function (snapshot) {
-        preventUsers.splice(0);
-        snapshot.forEach(function (childSnapshot) {
-          let child = {
-            uuid : childSnapshot.key,
-            prevent : childSnapshot.val(),
-          };
-          preventUsers.unshift(child);
+    const preventUsers = this.preventUsers;
+    const vue = this;
+    preventPostListRef.orderByChild('releaseDate').on('value', function (snapshot) {
+      preventUsers.splice(0);
+      snapshot.forEach(function (childSnapshot) {
+        let child = {
+          uuid : childSnapshot.key,
+          prevent : childSnapshot.val(),
+        };
+        preventUsers.unshift(child);
 
-          // get userInfo
-          let userRef = db.ref('users/' + childSnapshot.key);
+        // get userInfo
+        let userRef = db.ref('users/' + childSnapshot.key);
 
-          userRef.once('value', function (userSnapshot) {
-            vue.$set(child, 'user', userSnapshot.val());
-          });
+        userRef.once('value', function (userSnapshot) {
+          vue.$set(child, 'user', userSnapshot.val());
         });
-      })
+      });
+    })
+  },
+  methods: {
+    getDate : dateUtil.getDate,
+    releasePostPrevent(uuid, releaseDate) {
+      if (!confirm("포스트 제재를 해제하시겠습니까??")) return;
+      // 날짜를 오늘로 갱신
+      preventPostListRef.child(uuid).child("releaseDate").set((new Date).getTime());
     },
-    methods: {
-      getDate : dateUtil.getDate,
-      releasePostPrevent(uuid, releaseDate) {
-        if (!confirm("포스트 제재를 해제하시겠습니까??")) return;
-        // 날짜를 오늘로 갱신
-        preventPostListRef.child(uuid).child("releaseDate").set((new Date).getTime());
-      },
-      isRelease : cu.isRelease,
-      getBorder : cu.getBorder,
-      isOneYear: cu.isOneYear,
-      deletePostPrevent(uuid) {
-        if (!confirm("제재 정보를 삭제하시겠습니까??")) return;
-        // 제재 정보 삭제
-        preventPostListRef.child(uuid).remove();
-      }
+    isRelease : cu.isRelease,
+    getBorder : cu.getBorder,
+    isOneYear: cu.isOneYear,
+    deletePostPrevent(uuid) {
+      if (!confirm("제재 정보를 삭제하시겠습니까??")) return;
+      // 제재 정보 삭제
+      preventPostListRef.child(uuid).remove();
     }
   }
+}
 
 
 </script>
