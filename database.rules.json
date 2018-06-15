@@ -1,6 +1,51 @@
 {
+  // 기본적으로는 auth (회원가입) 유저만 접근 가능
   "rules": {
-    ".read": true,
-    ".write": true
+    ".read": "auth!=null",
+    ".write": "auth !=null",
+
+    // identifier는 비회원 유저도 작성가능
+    "identifier":{
+      ".read": true
+    },
+
+    "chatRoomList" :{
+      "$uid" : {
+        "$ouid" :{
+          // 채팅에 연관된 유저만 읽고 쓰기가 가능하게
+          ".read": "$uid===auth.uid || $ouid===auth.uid ",
+          ".write": "$uid===auth.uid || $ouid===auth.uid ",
+          // 마지막 채팅시간을 기준으로 인덱스
+          ".indexOn": ["lastChatTime"]
+        }
+      }
+    },
+
+    // 채팅은 시간순 인덱스
+    "chat" :{
+      "$chatRoomid" : {
+        ".indexOn": ["time"]
+      }
+    },
+
+    // 알람 시간순 인덱스 , 읽기,쓰기 알람과 관련된 유저만가능
+    "Alarm" :{
+      "$uid":{
+        "$aid":{
+          "alarmSummary" :{
+            ".read" : "$uid === data.child('cUuid').val() || $uid === data.child('pUuid').val()",
+            ".indexOn": ["time"]
+          }
+        }
+      }
+    },
+
+    // 구독 로그는 본인 쓰기만 가능하고 수정및 삭제는 불가능하게
+    "subscribe":{
+      ".write":false,
+      "$uid":{
+        ".read" : "$uid===auth.uid"
+      }
+    }
   }
 }
