@@ -59,10 +59,11 @@ exports.addMessage = functions.https.onRequest((req, res) => {
 });
 
 
-// 유저가 제거되었을때 (채팅방 제거, 알림제거)
+// 유저가 제거되었을때 (채팅방 제거, 알림제거, 광고수 제거)
 exports.deleteUser = functions.database.ref('/users/{userId}')
   .onDelete(event => {
     admin.database().ref('/Alarm/' + event.params.userId).remove();
+    admin.database().ref('/adMob/' + event.params.userId).remove();
     return admin.database().ref('/chatRoomList/' + event.params.userId).remove()
 
     // return admin.database().ref('/log').push({original:eventSnapshot.id})
