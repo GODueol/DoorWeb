@@ -258,6 +258,14 @@ function deleteAboutMyAccount(mUuid){
     // 유저 데이터 삭제
     promises.push(mUserRef.remove());
 
+    // prevent 데이터 삭제
+    promises.push(admin.database().ref('/prevents/user').child(mUuid).remove());
+    promises.push(admin.database().ref('/prevents/post').child(mUuid).remove());
+
+    // report 데이터 삭제
+    promises.push(admin.database().ref('/reports/users').child(mUuid).remove());
+    promises.push(admin.database().ref('/reports/posts').child(mUuid).remove());
+
     console.log('promises',promises);
     console.log('_.compact(promises)', _.compact(promises));
     return Promise.all(_.compact(promises));
