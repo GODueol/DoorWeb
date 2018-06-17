@@ -6,7 +6,8 @@
 
     // identifier는 비회원 유저도 작성가능
     "identifier":{
-      ".read": true
+      ".read": true,
+      ".write": true
     },
 
     "chatRoomList" :{
@@ -45,6 +46,17 @@
       ".write":false,
       "$uid":{
         ".read" : "$uid===auth.uid"
+      }
+    },
+
+    // coreCloud 올린 날짜 기준
+    "coreCloud":{
+        ".indexOn": ["attachDate"]
+    },
+    // posts 쓴 날짜 기준
+    "posts":{
+      "$cUuid":{
+          ".indexOn": ["writeDate"]
       }
     }
   }
