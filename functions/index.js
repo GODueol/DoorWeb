@@ -178,14 +178,14 @@ function deletePost(uuid) {
 
   const userPostRef = admin.database().ref('/posts/' + uuid);
 
-  return userPostRef.once('value', function(snapshot) {
-    snapshot.forEach(function(childSnapshot) {
+  return userPostRef.once('value', function (snapshot) {
+    snapshot.forEach(function (childSnapshot) {
       const postKey = childSnapshot.key;
       const postData = childSnapshot.val();
 
       console.log(postKey, postData);
 
-      if(postData.isCloud){
+      if (postData.isCloud) {
         // 관련 코어 클라우드 제거
         promises.push(admin.database().ref('/coreCloud/' + postKey).remove());
       }
@@ -194,8 +194,8 @@ function deletePost(uuid) {
       // gs://core-865fc.appspot.com/posts/k1WbaTLYQiR1ejg5NuPiE88zZkC3/-LEYfsf88PcZZqVlJ1Fd/picture
       // posts/{cUuid}/{postKey}/picture
       const bucket = gcs.bucket(bucketName); // 경로
-      if('pictureUrl' in postData) promises.push(bucket.file('posts/' + uuid + '/' + postKey + '/picture').delete());
-      if('soundUrl'   in postData) promises.push(bucket.file('posts/' + uuid + '/' + postKey + '/sound').delete());
+      if ('pictureUrl' in postData) promises.push(bucket.file('posts/' + uuid + '/' + postKey + '/picture').delete());
+      if ('soundUrl' in postData) promises.push(bucket.file('posts/' + uuid + '/' + postKey + '/sound').delete());
     });
 
     // 관련 데이터베이스 데이터 제거
@@ -206,7 +206,7 @@ function deletePost(uuid) {
 
 // 관련된 유저들 삭제, promise 반환
 function deleteRelatedUsers(userInfo, mUuid, fieldName, rFieldName) {
-  if(!(fieldName in userInfo)) return null;
+  if (!(fieldName in userInfo)) return null;
   console.log('userInfo[fieldName]', userInfo[fieldName]);
   return admin.database().ref('users').update(Object.keys(userInfo[fieldName])
     .reduce((map, uuid) => {
@@ -216,27 +216,27 @@ function deleteRelatedUsers(userInfo, mUuid, fieldName, rFieldName) {
 }
 
 // 로케이션 삭제
-function deleteLocation(mUuid){
+function deleteLocation(mUuid) {
   return admin.database().ref('location/users').child(mUuid).remove();
 }
 
 // 계정 삭제
-function deleteAboutMyAccount(mUuid){
+function deleteAboutMyAccount(mUuid) {
 
   const promises = [];
 
   const mUserRef = admin.database().ref('/users/').child(mUuid);
-  return mUserRef.once('value', function(snapshot) {
+  return mUserRef.once('value', function (snapshot) {
     const userInfo = snapshot.val();
 
     // gs://core-865fc.appspot.com/profile/pic/80RZJGZ6cmaHzAubYYJOlZGFd8Z2/profilePic1.jpg
     // profile/pic/{mUuid}/profilePic1.jpg
     // 사진 삭제 // 썸네일 사진 삭제
-    if('picUrls' in userInfo) {
+    if ('picUrls' in userInfo) {
       const bucket = gcs.bucket(bucketName); // 경로
-      ['1','2','3','4'].forEach(index => {
-        if(('picUrl' + index) in userInfo.picUrls) promises.push(bucket.file('profile/pic/' + mUuid + '/profilePic'+index+'.jpg').delete());
-        if(('thumbNail_picUrl' + index) in userInfo.picUrls) promises.push(bucket.file('profile/pic/' + mUuid + '/profilePic'+index+'_thumbNail.jpg').delete());
+      ['1', '2', '3', '4'].forEach(index => {
+        if (('picUrl' + index) in userInfo.picUrls) promises.push(bucket.file('profile/pic/' + mUuid + '/profilePic' + index + '.jpg').delete());
+        if (('thumbNail_picUrl' + index) in userInfo.picUrls) promises.push(bucket.file('profile/pic/' + mUuid + '/profilePic' + index + '_thumbNail.jpg').delete());
       })
     }
 
@@ -266,7 +266,7 @@ function deleteAboutMyAccount(mUuid){
     promises.push(admin.database().ref('/reports/users').child(mUuid).remove());
     promises.push(admin.database().ref('/reports/posts').child(mUuid).remove());
 
-    console.log('promises',promises);
+    console.log('promises', promises);
     console.log('_.compact(promises)', _.compact(promises));
     return Promise.all(_.compact(promises));
 
@@ -276,7 +276,7 @@ function deleteAboutMyAccount(mUuid){
 // Auth 삭제시 데이터 전부 삭제
 exports.deleteAboutMyAccount = functions.auth.user().onDelete(event => {
   const uid = event.data.uid;
-  console.log('delete uid',uid);
+  console.log('delete uid', uid);
   return deleteAboutMyAccount(uid)
 });
 
@@ -294,8 +294,8 @@ exports.writePost = functions.database.ref('/posts/{cUuid}/{postKey}')
       updates['/corePostCount'] = snapshot.numChildren();
       updates['/summaryUser/corePostCount'] = snapshot.numChildren();
 
-      return admin.database().ref('users').child(cUuid).once('value', function(snapshot) {
-        if(snapshot.val() !== null) {
+      return admin.database().ref('users').child(cUuid).once('value', function (snapshot) {
+        if (snapshot.val() !== null) {
           admin.database().ref('users').child(cUuid).update(updates);
         }
       });
@@ -327,4 +327,19 @@ exports.deleteAccountByWeb = functions.database.ref('/reports/deleteAccount/{uui
     });
   });
 
+
+exports.giveAdmob = functions.database.ref('/users/{userId}')
+  .onCreate((event) => {
+
+    return admin.database().ref('admob').child(event.params.userId).set({
+      blockCount: 1,
+      findUserCount: 1,
+      coreCloudProfileCount: 5,
+      mapSearchCount: 1,
+      navAlarmCount:3
+    }).then(() => {
+      // Redirect with 303 SEE OTHER to the URL of the pushed object in the Firebase console.
+      return "Success to put UserInfo Admin"
+    });
+  });
 
