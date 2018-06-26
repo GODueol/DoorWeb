@@ -127,6 +127,7 @@
         this.userId = this.user.uid
       }
       let notices = this.notices;
+      const vue = this;
 
       noticeRef.on('value', snapshot => {
         notices.length = 0;
@@ -136,38 +137,18 @@
       });
 
       noticeRef.on('child_added', function (data) {
-        if (data.val().pictureUrl != null) {
-
-          firebase.storage().refFromURL(data.val().pictureUrl).getDownloadURL().then(function (url) {
-            var xhr = new XMLHttpRequest();
-            xhr.responseType = 'blob';
-            xhr.onload = function (event) {
-              var blob = xhr.response;
-            };
-            xhr.open('GET', url);
-            xhr.send();
-
-            // Or inserted into an <img> element:
-            //var img = document.getElementById('listimage');
-            //img.src = url;
-
-
-//            notices.unshift({name: data.val().text, userId: data.val().uid, noticekey: data.key, pictureUrl: url})
-          }).catch(function (error) {
-
-          })
-        }
-        notices.unshift(data.val());
-
-//        notices.unshift({name: data.val().text, userId: data.val().uid, noticekey: data.key})
+        let obj = data.val();
+        vue.$set(obj, 'noticekey', data.key);
+        notices.unshift(obj);
       });
     },
     methods: {
       deleteTodo(i) {
         if (confirm("정말 공지를 삭제하시겠습니까?") === true) {
-          noticeRef.child(this.notices[i].noticekey).remove()
-          this.notices.splice(0, 1)
-
+          // 데이터 삭제
+          noticeRef.child(this.notices[i].noticekey).remove();
+          // 사진 삭제
+          firebase.storage().refFromURL(this.notices[i].pictureUrl).delete();
         }
       },
       createTodo(title, text) {
@@ -184,28 +165,22 @@
 
           let name = this.name
           let uid = this.userId
-          let selectedFile = document.getElementById('image').files[0]
-          if (selectedFile != null) {
-            storageRef.child(selectedFile.name).put(selectedFile).then(function (snapshot) {
+          let selectedFile = document.getElementById('image').files[0];
 
-              noticeRef.push({
-                name: name,
-                pictureUrl: snapshot.downloadURL,
-                uid: uid,
-                writeDate: Date.now(),
-                text: text,
-                title : title
-              });
+          let key = noticeRef.push({
+            name: name,
+            uid: uid,
+            writeDate: Date.now(),
+            text: text,
+            title : title
+          }).key;
+
+          if (selectedFile != null) {
+            storageRef.child(key).put(selectedFile).then(function (snapshot) {
+              noticeRef.child(key).child("pictureUrl").set(snapshot.downloadURL);
             })
-          } else {
-            noticeRef.push({
-              name: name,
-              uid: uid,
-              writeDate: Date.now(),
-              text: text,
-              title : title
-            });
           }
+
           this.title = this.text = "";
 
           $('#noticeWriteModal').modal('hide');
