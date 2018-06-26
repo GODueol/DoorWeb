@@ -127,19 +127,13 @@
         this.userId = this.user.uid
       }
       let notices = this.notices;
-      const vue = this;
-
       noticeRef.on('value', snapshot => {
-        notices.length = 0;
+          notices.splice(0);
           snapshot.forEach(childSnapshot => {
-            notices.unshift(childSnapshot.val());
+            const obj = childSnapshot.val();
+            obj['noticekey'] = childSnapshot.key;
+            notices.unshift(obj);
           });
-      });
-
-      noticeRef.on('child_added', function (data) {
-        let obj = data.val();
-        vue.$set(obj, 'noticekey', data.key);
-        notices.unshift(obj);
       });
     },
     methods: {
