@@ -1,10 +1,10 @@
 // Initialize Firebase
 export const config = {
-  apiKey: 'AIzaSyBvt4z9T0Db3aM-1tCocjrBbC62Ch6QY-8',
-  authDomain: 'core-865fc.firebaseapp.com',
-  databaseURL: 'https://core-865fc.firebaseio.com',
-  projectId: 'core-865fc',
-  storageBucket: 'core-865fc.appspot.com',
-  messagingSenderId: '699214818051'
+  apiKey: "AIzaSyBDo9SIz90hDK1w7e8IhajEzg-nEx_oRE0",
+  authDomain: "door-cb1cf.firebaseapp.com",
+  databaseURL: "https://door-cb1cf.firebaseio.com",
+  projectId: "door-cb1cf",
+  storageBucket: "door-cb1cf.appspot.com",
+  messagingSenderId: "125337908041"
 }
 

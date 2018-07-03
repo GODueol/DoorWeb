@@ -4,7 +4,7 @@ const admin = require('firebase-admin');
 const nodemailer = require('nodemailer');
 const gcs = require('@google-cloud/storage')();
 const _ = require('lodash');
-const bucketName = 'core-865fc.appspot.com';
+const bucketName = 'door-cb1cf.appspot.com';
 
 admin.initializeApp(functions.config().firebase);
 
@@ -93,7 +93,7 @@ exports.deleteChatMessage = functions.database.ref('/chat/{roomId}/{messageId}')
     const eventSnapshot = event.data.previous.val();
     if (eventSnapshot.isImage === 1) {
       const gcs = require('@google-cloud/storage')();
-      const bucket = gcs.bucket('core-865fc.appspot.com');
+      const bucket = gcs.bucket('door-cb1cf.appspot.com');
       const filePath = 'chat/image/' + event.params.roomId + '/';
       const fileName = eventSnapshot.content;
       console.log(filePath);
