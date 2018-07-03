@@ -1,6 +1,6 @@
 <template lang="html">
   <div class="starter-template">
-    <h1> Core Web </h1>
+    <h1> Door Web </h1>
     <div id="firebaseui-auth-container"/>
   </div>
 </template>

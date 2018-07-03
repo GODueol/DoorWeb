@@ -103,7 +103,7 @@
       service: 'Gmail',
       host: 'localhost',
       port: '465',
-      user: 'coreapp0729@gmail.com',
+      user: 'door0702@gmail.com',
       password: 'zjvlqlswlgk1cmd',
     },
   };

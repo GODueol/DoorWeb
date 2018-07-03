@@ -105,7 +105,7 @@ exports.deleteChatMessage = functions.database.ref('/chat/{roomId}/{messageId}')
 
 
 // Admin Email
-const adminEmail = "coreapp0729@gmail.com";
+const adminEmail = "door0702@gmail.com";
 const mailTransport = nodemailer.createTransport({
   service: 'gmail',
   auth: {
